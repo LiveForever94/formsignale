@@ -1,4 +1,4 @@
-const CACHE = 'formsignale-v1';
+const CACHE = 'formsignale-v2';
 const PRECACHE = [
   './',
   './index.html',

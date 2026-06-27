@@ -153,11 +153,7 @@ var LAND_NAMES = {
 var SB_URL = "https://vcoutgfdphaisxbhswvo.supabase.co";
 var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjb3V0Z2ZkcGhhaXN4Ymhzd3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYwMjgsImV4cCI6MjA5ODE2MjAyOH0.fHHYFEfJFtahguVM0XBjn8dcM6-WX89Uaz_VtyYdpfM";
 var SB_TABLE = "formsignale";
-var USER_ID = localStorage.getItem("fs-user-id");
-if (!USER_ID) {
-  USER_ID = "user_" + Math.random().toString(36).slice(2,10);
-  localStorage.setItem("fs-user-id", USER_ID);
-}
+var USER_ID = "stefan";
 function sbH() {
   return {"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"};
 }
@@ -170,7 +166,10 @@ function saveLocal() {
 }
 function sbAdd(name) {
   fetch(SB_URL+"/rest/v1/"+SB_TABLE, {method:"POST",headers:sbH(),body:JSON.stringify({user_id:USER_ID,location_name:name})})
-  .catch(function(){});
+  .then(function(r){
+    if(!r.ok) r.text().then(function(t){console.error("sbAdd Fehler:",r.status,t);});
+  })
+  .catch(function(e){console.error("sbAdd Network:",e);});
 }
 function sbRemove(name) {
   fetch(SB_URL+"/rest/v1/"+SB_TABLE+"?user_id=eq."+encodeURIComponent(USER_ID)+"&location_name=eq."+encodeURIComponent(name), {method:"DELETE",headers:sbH()})

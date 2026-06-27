@@ -6,7 +6,6 @@
 <title>Formsignale in Deutschland</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a3558">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Formsignale">
@@ -14,10 +13,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',Arial,sans-serif;}
+body{font-family:"Segoe UI",Arial,sans-serif;}
 #app{display:flex;flex-direction:column;height:100vh;}
 #header{background:linear-gradient(135deg,#0d1b2a,#1a3558);color:#fff;padding:9px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .hl{font-size:22px;}.ht h1{font-size:15px;font-weight:700;}.ht p{font-size:10px;opacity:.5;margin-top:1px;}
+#tabs{display:flex;background:#0d1b2a;flex-shrink:0;}
+.tab{flex:1;padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;user-select:none;}
+.tab.active{color:#fff;border-bottom-color:#3498db;}
+#screen-map{display:flex;flex-direction:column;flex:1;min-height:0;}
+#screen-list{display:none;flex-direction:column;flex:1;min-height:0;background:#f5f6fa;}
 #toolbar{background:#fff;border-bottom:2px solid #dee2e6;padding:5px 10px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
 .fr{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
 .rl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#aaa;min-width:90px;}
@@ -27,50 +31,30 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
 .dv{width:1px;height:18px;background:#dee2e6;margin:0 2px;}
 #sb{background:#f8f9fa;border-bottom:1px solid #dee2e6;padding:3px 12px;font-size:11px;color:#666;flex-shrink:0;}
 #map{flex:1;min-height:0;}
+/* Checkliste */
+#list-header{background:#fff;padding:10px 12px;border-bottom:1px solid #dee2e6;flex-shrink:0;}
+#list-progress{font-size:11px;color:#666;margin-bottom:6px;}
+#list-progress-bar{height:4px;background:#eee;border-radius:2px;overflow:hidden;}
+#list-progress-fill{height:100%;background:#16a085;border-radius:2px;transition:width .3s;}
+#list-search{width:100%;padding:7px 10px;border:1px solid #dee2e6;border-radius:8px;font-size:13px;margin-top:6px;outline:none;}
+#list-filter{display:flex;gap:5px;margin-top:6px;}
+#list-filter select{padding:5px 6px;border:1.5px solid #dee2e6;border-radius:8px;font-size:11px;background:#fff;color:#333;outline:none;min-width:0;flex:1;}
+#list-body{flex:1;overflow-y:auto;padding:8px 0;}
+.list-group{margin-bottom:2px;}
+.list-group-header{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#aaa;background:#f5f6fa;position:sticky;top:0;z-index:1;}
+.list-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff;border-bottom:1px solid #f0f0f0;cursor:pointer;}
+.list-item.done .li-name{text-decoration:line-through;color:#bbb;}
+.list-item.done .li-sub{color:#ccc;}
+.li-check{width:22px;height:22px;border-radius:6px;border:2px solid #dee2e6;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.list-item.done .li-check{background:#16a085;border-color:#16a085;color:#fff;}
+.li-name{font-size:13px;font-weight:600;color:#0d1b2a;}
+.li-sub{font-size:10px;color:#999;margin-top:1px;}
+/* Popups */
 .pn{font-size:13px;font-weight:700;color:#0d1b2a;margin-bottom:3px;}
 .ps{font-size:10px;color:#999;margin-bottom:2px;}
 .pb{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;}
 .pa{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;margin-left:3px;}
 .pr{font-size:10px;color:#666;font-style:italic;margin-top:3px;}
-
-/* ── Tab Navigation ── */
-#tabs { display:flex; background:#0d1b2a; flex-shrink:0; }
-.tab { flex:1; padding:10px 0; text-align:center; font-size:12px; font-weight:700;
-  color:rgba(255,255,255,.4); cursor:pointer; border-bottom:3px solid transparent;
-  transition:all .2s; user-select:none; }
-.tab.active { color:#fff; border-bottom-color:#3498db; }
-
-/* ── Screens ── */
-#screen-map { display:flex; flex-direction:column; flex:1; min-height:0; }
-#screen-list { display:none; flex-direction:column; flex:1; min-height:0; background:#f5f6fa; }
-
-/* ── Checkliste Header ── */
-#list-header { background:#fff; padding:10px 12px; border-bottom:1px solid #dee2e6; flex-shrink:0; }
-#list-progress { font-size:11px; color:#666; margin-bottom:6px; }
-#list-progress-bar { height:4px; background:#eee; border-radius:2px; overflow:hidden; }
-#list-progress-fill { height:100%; background:#16a085; border-radius:2px; transition:width .3s; }
-#list-search { width:100%; padding:7px 10px; border:1px solid #dee2e6; border-radius:8px;
-  font-size:13px; margin-top:6px; outline:none; }
-#list-filter { display:flex; gap:5px; margin-top:6px; }
-#list-filter select { padding:5px 6px; border:1.5px solid #dee2e6; border-radius:8px;
-  font-size:11px; background:#fff; color:#333; outline:none; min-width:0; }
-
-/* ── Checkliste Body ── */
-#list-body { flex:1; overflow-y:auto; padding:8px 0; }
-.list-group { margin-bottom:4px; }
-.list-group-header { padding:6px 12px; font-size:10px; font-weight:700;
-  text-transform:uppercase; letter-spacing:.6px; color:#aaa; background:#f5f6fa;
-  position:sticky; top:0; z-index:1; }
-.list-item { display:flex; align-items:center; gap:10px; padding:9px 12px;
-  background:#fff; border-bottom:1px solid #f0f0f0; cursor:pointer; active:background:#f5f6fa; }
-.list-item.done .li-name { text-decoration:line-through; color:#bbb; }
-.list-item.done .li-sub { color:#ccc; }
-.li-check { width:22px; height:22px; border-radius:6px; border:2px solid #dee2e6;
-  flex-shrink:0; display:flex; align-items:center; justify-content:center;
-  font-size:13px; transition:all .15s; }
-.list-item.done .li-check { background:#16a085; border-color:#16a085; color:#fff; }
-.li-name { font-size:13px; font-weight:600; color:#0d1b2a; }
-.li-sub { font-size:10px; color:#999; margin-top:1px; }
 </style>
 </head>
 <body>
@@ -79,7 +63,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
   <div class="hl">&#x1F6A6;</div>
   <div class="ht">
     <h1>Formsignale in Deutschland</h1>
-    <p>Offline · Quelle: FormsignalBahnhofsVerzeichnis (hobby-eisenbahnfotografie.de)</p>
+    <p>Offline &middot; Quelle: FormsignalBahnhofsVerzeichnis</p>
   </div>
 </div>
 <div id="tabs">
@@ -97,7 +81,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
   </div>
   <div class="fr">
     <span class="rl">Meine Karte:</span>
-    <button class="chip off" id="cap" style="background:#2980b9" onclick="tog('a','p')">&#9658; Zeitnah besuchen <span class="n" id="nap">0</span></button>
+    <button class="chip off" id="cap" style="background:#2980b9" onclick="tog('a','p')">&#9658; Zeitnah <span class="n" id="nap">0</span></button>
     <button class="chip off" id="cai" style="background:#e6b800" onclick="tog('a','i')">&#9733; Interessant <span class="n" id="nai">0</span></button>
     <button class="chip off" id="cav" style="background:#16a085" onclick="tog('a','v')">&#10003; Besucht <span class="n" id="nav">0</span></button>
   </div>
@@ -108,7 +92,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
     <button class="chip off" id="chf" style="background:#6c3483" onclick="tog('h','f')">&#9670; Fotospots <span class="n" id="nhf">0</span></button>
   </div>
 </div>
-<div id="sb"><span id="sb-txt">Lade...</span></div>
+<div id="sb"><span id="sb-txt">Filter aktivieren um Stationen zu sehen</span></div>
 <div id="map"></div>
 </div><!-- /screen-map -->
 
@@ -118,9 +102,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
     <div id="list-progress-bar"><div id="list-progress-fill" style="width:0%"></div></div>
     <input id="list-search" type="search" placeholder="&#x1F50D; Suchen..." oninput="renderList()">
     <div id="list-filter">
-      <select id="fl-land" onchange="renderList()" style="flex:1">
-        <option value="">Alle Bundesl&#228;nder</option>
-      </select>
+      <select id="fl-land" onchange="renderList()"><option value="">Alle Bundesl&#228;nder</option></select>
       <select id="fl-kat" onchange="renderList()">
         <option value="">Alle Typen</option>
         <option value="signal">Formsignale</option>
@@ -137,10 +119,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
   </div>
   <div id="list-body"></div>
 </div>
-</div>
+</div><!-- /app -->
+
 <script>
 "use strict";
 
+// ── KONFIGURATION ──────────────────────────────────────────────────────────
 var SC = {
   1:{col:"#27ae60",dark:"#1a6632",lbl:"Formsignale aktiv",sym:"&#9679;"},
   3:{col:"#e67e22",dark:"#9a4000",lbl:"Zustand unsicher",sym:"&#9681;"},
@@ -157,7 +141,56 @@ var HC = {
   m:{col:"#7f8c00",dark:"#4a5300",lbl:"Museumsbahn"},
   f:{col:"#6c3483",dark:"#4a235a",lbl:"Fotospot"}
 };
+var LAND_NAMES = {
+  "BW":"Baden-W&#252;rttemberg","BY":"Bayern","BE":"Berlin","BB":"Brandenburg",
+  "HB":"Bremen","HH":"Hamburg","HE":"Hessen","MV":"Mecklenburg-Vorpommern",
+  "NI":"Niedersachsen","NW":"Nordrhein-Westfalen","RP":"Rheinland-Pfalz",
+  "SL":"Saarland","SN":"Sachsen","ST":"Sachsen-Anhalt","SH":"Schleswig-Holstein",
+  "TH":"Th&#252;ringen"
+};
 
+// ── SUPABASE ───────────────────────────────────────────────────────────────
+var SB_URL = "https://vcoutgfdphaisxbhswvo.supabase.co";
+var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjb3V0Z2ZkcGhhaXN4Ymhzd3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYwMjgsImV4cCI6MjA5ODE2MjAyOH0.fHHYFEfJFtahguVM0XBjn8dcM6-WX89Uaz_VtyYdpfM";
+var SB_TABLE = "formsignale";
+var USER_ID = localStorage.getItem("fs-user-id");
+if (!USER_ID) {
+  USER_ID = "user_" + Math.random().toString(36).slice(2,10);
+  localStorage.setItem("fs-user-id", USER_ID);
+}
+function sbH() {
+  return {"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"};
+}
+
+// ── BESUCHT-DATEN ─────────────────────────────────────────────────────────
+var VISITED = new Set(JSON.parse(localStorage.getItem("fs-visited") || "[]"));
+
+function saveLocal() {
+  localStorage.setItem("fs-visited", JSON.stringify([...VISITED]));
+}
+function sbAdd(name) {
+  fetch(SB_URL+"/rest/v1/"+SB_TABLE, {method:"POST",headers:sbH(),body:JSON.stringify({user_id:USER_ID,location_name:name})})
+  .catch(function(){});
+}
+function sbRemove(name) {
+  fetch(SB_URL+"/rest/v1/"+SB_TABLE+"?user_id=eq."+encodeURIComponent(USER_ID)+"&location_name=eq."+encodeURIComponent(name), {method:"DELETE",headers:sbH()})
+  .catch(function(){});
+}
+function loadFromSupabase() {
+  fetch(SB_URL+"/rest/v1/"+SB_TABLE+"?user_id=eq."+encodeURIComponent(USER_ID)+"&select=location_name", {headers:sbH()})
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    if (!Array.isArray(rows)) return;
+    rows.forEach(function(row){ VISITED.add(row.location_name); });
+    saveLocal();
+    refreshMarkerIcons();
+    updateProgress();
+    applyFilter();
+  })
+  .catch(function(){});
+}
+
+// ── DATEN ─────────────────────────────────────────────────────────────────
 var ANN = {
   // ── Zeitnah besuchen ──────────────────────────────────────────────────
   "Hilchenbach":                     "p",
@@ -851,7 +884,8 @@ var D = [
 ["Zwickau (Sachs) Hbf",1,50.717,12.496,"SN","DB AG","510"],
 ];
 
-var theMap = L.map("map", {attributionControl:false}).setView([51.2,10.4],6);
+// ── KARTE ─────────────────────────────────────────────────────────────────
+var theMap = L.map("map",{attributionControl:false}).setView([51.2,10.4],6);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(theMap);
 
 var activeS = new Set();
@@ -861,379 +895,149 @@ var activeH = new Set();
 function mkSignalIcon(status, ann) {
   var sc = SC[status];
   var ac = ann ? AC[ann] : null;
-  var badge = ac ? "<div style=\"position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:" + ac.col + ";border:1.5px solid #fff;border-radius:50%;\"></div>" : "";
+  var badge = ac ? "<div style=\"position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:"+ac.col+";border:1.5px solid #fff;border-radius:50%;\"></div>" : "";
   return L.divIcon({
     className:"",
-    html:"<div style=\"position:relative;width:14px;height:14px\"><div style=\"position:absolute;top:1px;left:1px;width:12px;height:12px;background:" + sc.col + ";border:1.5px solid " + sc.dark + ";border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.4);\"></div>" + badge + "</div>",
-    iconSize:[14,14], iconAnchor:[7,7], popupAnchor:[0,-9]
+    html:"<div style=\"position:relative;width:14px;height:14px\"><div style=\"position:absolute;top:1px;left:1px;width:12px;height:12px;background:"+sc.col+";border:1.5px solid "+sc.dark+";border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.4);\"></div>"+badge+"</div>",
+    iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-9]
   });
 }
-
 function mkHighlightIcon(kat, visited) {
   var hc = HC[kat];
   var badge = visited ? "<div style=\"position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:#16a085;border:1.5px solid #fff;border-radius:50%;\"></div>" : "";
   var op = visited ? "opacity:.45;" : "";
   return L.divIcon({
     className:"",
-    html:"<div style=\"position:relative;width:12px;height:12px\"><div style=\"width:12px;height:12px;background:" + hc.col + ";border:1.5px solid " + hc.dark + ";transform:rotate(45deg);box-shadow:0 1px 3px rgba(0,0,0,.4);" + op + "\"></div>" + badge + "</div>",
-    iconSize:[12,12], iconAnchor:[6,6], popupAnchor:[0,-8]
+    html:"<div style=\"position:relative;width:12px;height:12px\"><div style=\"width:12px;height:12px;background:"+hc.col+";border:1.5px solid "+hc.dark+";transform:rotate(45deg);box-shadow:0 1px 3px rgba(0,0,0,.4);"+op+"\"></div>"+badge+"</div>",
+    iconSize:[12,12],iconAnchor:[6,6],popupAnchor:[0,-8]
   });
 }
 
+function effAnn(name) {
+  var a = ANN[name] || null;
+  return (VISITED.has(name) && a !== "p" && a !== "i") ? "v" : a;
+}
+
+// Marker erstellen
 var allMarkers = [];
 var cntS = {1:0,3:0,5:0,7:0};
 var cntA = {p:0,i:0,v:0};
 
 D.forEach(function(row) {
   var name=row[0],status=row[1],lat=row[2],lng=row[3],land=row[4],bahn=row[5],kbs=row[6],rem=row[7]||"";
-  var ann = ANN[name] || null;
-  var effAnn = (VISITED.has(name) && ann !== "p" && ann !== "i") ? "v" : ann;
-  var annKey = ann || "0";
+  var ea = effAnn(name);
   var sc = SC[status];
-  var ac = effAnn ? AC[effAnn] : null;
-  var mk = L.marker([lat,lng], {icon:mkSignalIcon(status,effAnn)});
+  var ac = ea ? AC[ea] : null;
+  var mk = L.marker([lat,lng],{icon:mkSignalIcon(status,ea)});
   mk.bindPopup(
-    "<div class=\"pn\">" + name + "</div>" +
-    "<div class=\"ps\">" + land + " &middot; " + bahn + " &middot; KBS " + kbs + "</div>" +
-    "<span class=\"pb\" style=\"background:" + sc.col + "\">" + sc.sym + " " + sc.lbl + "</span>" +
-    (ac ? "<span class=\"pa\" style=\"background:" + ac.col + "\">" + ac.sym + " " + ac.lbl + "</span>" : "") +
-    (rem ? "<div class=\"pr\">&#8505; " + rem + "</div>" : "")
+    "<div class=\"pn\">"+name+"</div>"+
+    "<div class=\"ps\">"+land+" &middot; "+bahn+" &middot; KBS "+kbs+"</div>"+
+    "<span class=\"pb\" style=\"background:"+sc.col+"\">"+sc.sym+" "+sc.lbl+"</span>"+
+    (ac?"<span class=\"pa\" style=\"background:"+ac.col+"\">"+ac.sym+" "+ac.lbl+"</span>":"")+
+    (rem?"<div class=\"pr\">&#8505; "+rem+"</div>":"")
   );
-  allMarkers.push({mk:mk, status:status, ann:ann, annKey:annKey, name:name});
+  allMarkers.push({mk:mk,status:status,ann:ANN[name]||null,name:name,land:land});
   cntS[status]++;
-  if (ann) cntA[ann]++;
-  else if (VISITED.has(name)) cntA['v']++;
+  var a = ANN[name];
+  if (a) cntA[a] = (cntA[a]||0)+1;
 });
-
-Object.keys(cntS).forEach(function(s){ document.getElementById("ns"+s).textContent = cntS[s]; });
-Object.keys(cntA).forEach(function(a){ document.getElementById("na"+a).textContent = cntA[a]; });
+Object.keys(cntS).forEach(function(s){document.getElementById("ns"+s).textContent=cntS[s];});
+Object.keys(cntA).forEach(function(a){document.getElementById("na"+a).textContent=cntA[a];});
 
 var allHighlights = [];
 var cntH = {b:0,m:0,f:0};
-
 H.forEach(function(row) {
   var name=row[0],kat=row[1],lat=row[2],lng=row[3],desc=row[4],url=row[5]||"";
   var hc = HC[kat];
-  var mk = L.marker([lat,lng], {icon:mkHighlightIcon(kat, VISITED.has(name))});
+  var mk = L.marker([lat,lng],{icon:mkHighlightIcon(kat,VISITED.has(name))});
   mk.bindPopup(
-    "<div class=\"pn\">" + name + "</div>" +
-    "<span class=\"pb\" style=\"background:" + hc.col + "\">&#9670; " + hc.lbl + "</span>" +
-    "<div class=\"pr\" style=\"margin-top:5px\">" + desc + "</div>" +
-    (url ? "<div style=\"margin-top:5px\"><a href=\"" + url + "\" target=\"_blank\" style=\"font-size:11px;color:#2980b9\">" + url.replace("https://","") + "</a></div>" : "")
+    "<div class=\"pn\">"+name+"</div>"+
+    "<span class=\"pb\" style=\"background:"+hc.col+"\">&#9670; "+hc.lbl+"</span>"+
+    "<div class=\"pr\" style=\"margin-top:5px\">"+desc+"</div>"+
+    (url?"<div style=\"margin-top:5px\"><a href=\""+url+"\" target=\"_blank\" style=\"font-size:11px;color:#2980b9\">"+url.replace("https://","")+"</a></div>":"")
   );
-  allHighlights.push({mk:mk, kat:kat, name:name});
+  allHighlights.push({mk:mk,kat:kat,name:name});
   cntH[kat]++;
 });
+Object.keys(cntH).forEach(function(k){document.getElementById("nh"+k).textContent=cntH[k];});
 
-Object.keys(cntH).forEach(function(k){ document.getElementById("nh"+k).textContent = cntH[k]; });
+function refreshMarkerIcons() {
+  allMarkers.forEach(function(o){
+    o.mk.setIcon(mkSignalIcon(o.status, effAnn(o.name)));
+  });
+  allHighlights.forEach(function(o){
+    o.mk.setIcon(mkHighlightIcon(o.kat, VISITED.has(o.name)));
+  });
+}
 
 function applyFilter() {
   var shown = 0;
   allMarkers.forEach(function(o) {
-    var visible = false;
-    // Annotierte Stationen: sichtbar wenn ihre Annotation aktiv ist
-    if (o.ann === "p" && activeA.has("p")) visible = true;
-    else if (o.ann === "p" && activeA.has("i")) visible = true;
-    else if (o.ann === "i" && activeA.has("i")) visible = true;
-    else if (o.ann === "v" && activeA.has("v")) visible = true;
-    // Alle Stationen: sichtbar wenn ihr Status aktiv ist
-    if (activeS.has(o.status)) visible = true;
-    if (visible) { if (!theMap.hasLayer(o.mk)) o.mk.addTo(theMap); shown++; }
-    else         { if ( theMap.hasLayer(o.mk)) theMap.removeLayer(o.mk); }
+    var vis = false;
+    var ann = ANN[o.name] || null;
+    var isV = VISITED.has(o.name) || ann === "v";
+    if (ann === "p" && activeA.has("p")) vis = true;
+    if (ann === "p" && activeA.has("i")) vis = true;
+    if (ann === "i" && activeA.has("i")) vis = true;
+    if (isV && activeA.has("v")) vis = true;
+    if (activeS.has(o.status)) vis = true;
+    if (vis){if(!theMap.hasLayer(o.mk))o.mk.addTo(theMap);shown++;}
+    else    {if( theMap.hasLayer(o.mk))theMap.removeLayer(o.mk);}
   });
-  document.getElementById("sb-txt").textContent = shown + " von " + D.length + " Betriebsstellen sichtbar";
+  document.getElementById("sb-txt").textContent = shown+" von "+D.length+" Betriebsstellen sichtbar";
 }
 
 function tog(type, key) {
-  var chipId = type==="s" ? "cs"+key : type==="a" ? "ca"+key : "ch"+key;
-  var set     = type==="s" ? activeS  : type==="a" ? activeA  : activeH;
-  var chip = document.getElementById(chipId);
-  if (set.has(key)) { set.delete(key); chip.classList.add("off"); }
-  else              { set.add(key);    chip.classList.remove("off"); }
-  allHighlights.forEach(function(o) {
-    if (activeH.has(o.kat)) { if (!theMap.hasLayer(o.mk)) o.mk.addTo(theMap); }
-    else                    { if ( theMap.hasLayer(o.mk)) theMap.removeLayer(o.mk); }
+  var chipId = type==="s"?"cs"+key:type==="a"?"ca"+key:"ch"+key;
+  var set    = type==="s"?activeS:type==="a"?activeA:activeH;
+  var chip   = document.getElementById(chipId);
+  if (set.has(key)){set.delete(key);chip.classList.add("off");}
+  else             {set.add(key);   chip.classList.remove("off");}
+  allHighlights.forEach(function(o){
+    if(activeH.has(o.kat)){if(!theMap.hasLayer(o.mk))o.mk.addTo(theMap);}
+    else                  {if( theMap.hasLayer(o.mk))theMap.removeLayer(o.mk);}
   });
   applyFilter();
-
+}
 
 // ── CHECKLISTE ─────────────────────────────────────────────────────────────
-var VISITED = new Set(JSON.parse(localStorage.getItem('fs-visited') || '[]'));
-var listFilter = 'all';
-
-function saveVisited() {
-  localStorage.setItem('fs-visited', JSON.stringify([...VISITED]));
-}
-
-function toggleVisited(name) {
-  if (VISITED.has(name)) VISITED.delete(name);
-  else VISITED.add(name);
-  saveVisited();
-  updateProgress();
-  renderList();
-  // Marker auf der Karte aktualisieren
-  allMarkers.forEach(function(o) {
-    if (o.name === name) {
-      o.mk.setIcon(mkSignalIcon(o.status, VISITED.has(name) ? 'v' : (ANN[name]||null)));
-    }
-  });
-}
-
-function updateProgress() {
-  var total = D.length + H.length;
-  var done = 0;
-  D.forEach(function(r){ if (VISITED.has(r[0])) done++; });
-  H.forEach(function(r){ if (VISITED.has(r[0])) done++; });
-  document.getElementById('lp-done').textContent = done;
-  document.getElementById('lp-total').textContent = total;
-  document.getElementById('list-progress-fill').style.width = Math.round(done/total*100) + '%';
-}
-
-
-
-function renderList() {
-  var q = document.getElementById('list-search').value.toLowerCase();
-  var body = document.getElementById('list-body');
-  var html = '';
-
-  // Bundesländer-Gruppen für Formsignale
-  var byLand = {};
-  if (listFilter !== 'spot') {
-    D.forEach(function(r) {
-      var name=r[0], land=r[4];
-      var done = VISITED.has(name);
-      if (listFilter === 'open' && done) return;
-      if (listFilter === 'done' && !done) return;
-      if (q && name.toLowerCase().indexOf(q) < 0) return;
-      if (!byLand[land]) byLand[land] = [];
-      byLand[land].push({name:name, sub:r[5]+' · KBS '+r[6], done:done});
-    });
-    Object.keys(byLand).sort().forEach(function(land) {
-      html += '<div class="list-group">';
-      html += '<div class="list-group-header">&#9679; Formsignale – ' + land + '</div>';
-      byLand[land].forEach(function(item) {
-        html += listItemHTML(item.name, item.sub, item.done);
-      });
-      html += '</div>';
-    });
-  }
-
-  // Highlight-Gruppen
-  if (listFilter !== 'signal') {
-    var byKat = {};
-    H.forEach(function(r) {
-      var name=r[0], kat=r[1];
-      var done = VISITED.has(name);
-      if (listFilter === 'open' && done) return;
-      if (listFilter === 'done' && !done) return;
-      if (q && name.toLowerCase().indexOf(q) < 0) return;
-      var katName = HC[kat].lbl + 'en';
-      if (!byKat[katName]) byKat[katName] = [];
-      byKat[katName].push({name:name, sub:r[4]||'', done:done});
-    });
-    Object.keys(byKat).sort().forEach(function(kat) {
-      html += '<div class="list-group">';
-      html += '<div class="list-group-header">&#9670; ' + kat + '</div>';
-      byKat[kat].forEach(function(item) {
-        html += listItemHTML(item.name, item.sub, item.done);
-      });
-      html += '</div>';
-    });
-  }
-
-  if (!html) html = '<div style="text-align:center;padding:40px;color:#aaa;font-size:13px">Keine Eintr&#228;ge gefunden</div>';
-  body.innerHTML = html;
-  // Event delegation
-  body.onclick = function(e) {
-    var item = e.target.closest('.list-item');
-    if (item) toggleVisited(item.getAttribute('data-name'));
-  };
-}
-
-function listItemHTML(name, sub, done) {
-  var enc = name.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-  return "<div class=\"list-item" + (done?" done":"") + "\" data-name=\"" + enc + "\">" +
-    "<div class=\"li-check\">" + (done?"&#10003;":"") + "</div>" +
-    "<div><div class=\"li-name\">" + name + "</div><div class=\"li-sub\">" + sub + "</div></div>" +
-    "</div>";
-}
-
-function showTab(tab) {
-  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-  if (tab === 'map') {
-    document.getElementById('screen-map').style.display = 'flex';
-    document.getElementById('screen-list').style.display = 'none';
-    document.querySelector('.tab:nth-child(1)').classList.add('active');
-    theMap.invalidateSize();
-  } else {
-    document.getElementById('screen-map').style.display = 'none';
-    document.getElementById('screen-list').style.display = 'flex';
-    document.querySelector('.tab:nth-child(2)').classList.add('active');
-    updateProgress();
-    renderList();
-  }
-}
-
-
-
-}
-
-applyFilter();
-
-
-// ── CHECKLISTE ─────────────────────────────────────────────────────────────
-
-var VISITED = new Set(JSON.parse(localStorage.getItem("fs-visited") || "[]"));
-
-// ── SUPABASE SYNC ──────────────────────────────────────────────────────────
-var SB_URL = "https://vcoutgfdphaisxbhswvo.supabase.co";
-var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjb3V0Z2ZkcGhhaXN4Ymhzd3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYwMjgsImV4cCI6MjA5ODE2MjAyOH0.fHHYFEfJFtahguVM0XBjn8dcM6-WX89Uaz_VtyYdpfM";
-var SB_TABLE = "formsignale";
-
-// Eindeutige Geräte-ID (wird einmalig generiert und gespeichert)
-var USER_ID = localStorage.getItem("fs-user-id");
-if (!USER_ID) {
-  USER_ID = "user_" + Math.random().toString(36).slice(2,10);
-  localStorage.setItem("fs-user-id", USER_ID);
-}
-
-function sbHeaders() {
-  return {
-    "apikey": SB_KEY,
-    "Authorization": "Bearer " + SB_KEY,
-    "Content-Type": "application/json",
-    "Prefer": "return=minimal"
-  };
-}
-
-// Alle besuchten Orte vom Server laden
-function loadFromSupabase() {
-  fetch(SB_URL + "/rest/v1/" + SB_TABLE + "?user_id=eq." + encodeURIComponent(USER_ID) + "&select=location_name", {
-    headers: sbHeaders()
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(rows){
-    if (!Array.isArray(rows)) return;
-    rows.forEach(function(row){ VISITED.add(row.location_name); });
-    // Auch lokal speichern als Fallback
-    localStorage.setItem("fs-visited", JSON.stringify([...VISITED]));
-    // Karte und Checkliste aktualisieren
-    allMarkers.forEach(function(o){
-      var baseAnn = ANN[o.name] || null;
-      var effAnn = (VISITED.has(o.name) && baseAnn !== "p" && baseAnn !== "i") ? "v" : baseAnn;
-      o.mk.setIcon(mkSignalIcon(o.status, effAnn));
-    });
-    allHighlights.forEach(function(o){
-      o.mk.setIcon(mkHighlightIcon(o.kat, VISITED.has(o.name)));
-    });
-    updateProgress();
-    applyFilter();
-  })
-  .catch(function(){ console.log("Offline – nutze lokalen Cache"); });
-}
-
-// Eintrag in Supabase speichern
-function sbAdd(name) {
-  return fetch(SB_URL + "/rest/v1/" + SB_TABLE, {
-    method: "POST",
-    headers: sbHeaders(),
-    body: JSON.stringify({user_id: USER_ID, location_name: name})
-  });
-}
-
-// Eintrag aus Supabase löschen
-function sbRemove(name) {
-  return fetch(SB_URL + "/rest/v1/" + SB_TABLE + "?user_id=eq." + encodeURIComponent(USER_ID) + "&location_name=eq." + encodeURIComponent(name), {
-    method: "DELETE",
-    headers: sbHeaders()
-  });
-}
-
-var LAND_NAMES = {
-  "BW":"Baden-Württemberg","BY":"Bayern","BE":"Berlin","BB":"Brandenburg",
-  "HB":"Bremen","HH":"Hamburg","HE":"Hessen","MV":"Mecklenburg-Vorpommern",
-  "NI":"Niedersachsen","NW":"Nordrhein-Westfalen","RP":"Rheinland-Pfalz",
-  "SL":"Saarland","SN":"Sachsen","ST":"Sachsen-Anhalt","SH":"Schleswig-Holstein",
-  "TH":"Thüringen"
-};
-
 function guessLand(lat, lng) {
-  if (lat > 54.3) return "SH";
-  if (lat > 53.8 && lng > 10.9) return "MV";
-  if (lat > 53.5 && lng > 13.8) return "MV";
-  if (lat > 53.0 && lng > 14.0) return "BB";
-  if (lat > 53.0 && lng > 11.5 && lng < 14.0) return "MV";
-  if (lat > 52.3 && lat < 54.0 && lng > 11.5 && lng < 14.6) return "BB";
-  if (lat > 51.8 && lat < 53.0 && lng > 9.8 && lng < 12.8) return "ST";
-  if (lat > 52.0 && lat < 53.8 && lng > 6.5 && lng < 10.0) return "NI";
-  if (lat > 51.0 && lat < 52.2 && lng > 5.9 && lng < 9.5) return "NW";
-  if (lat > 50.2 && lat < 51.8 && lng > 11.8 && lng < 15.2) return "SN";
-  if (lat > 50.1 && lat < 51.7 && lng > 9.9 && lng < 12.7) return "TH";
-  if (lat > 49.4 && lat < 51.6 && lng > 7.8 && lng < 10.3) return "HE";
-  if (lat > 47.3 && lat < 50.6 && lng > 9.7) return "BY";
-  if (lat > 47.5 && lat < 49.8 && lng > 7.5 && lng < 10.5) return "BW";
-  if (lat > 49.1 && lat < 50.9 && lng > 6.0 && lng < 8.5) return "RP";
+  if (lat>54.3) return "SH";
+  if (lat>53.8&&lng>10.9) return "MV";
+  if (lat>53.5&&lng>13.8) return "MV";
+  if (lat>53.0&&lng>14.0) return "BB";
+  if (lat>53.0&&lng>11.5&&lng<14.0) return "MV";
+  if (lat>52.3&&lat<54.0&&lng>11.5&&lng<14.6) return "BB";
+  if (lat>51.8&&lat<53.0&&lng>9.8&&lng<12.8) return "ST";
+  if (lat>52.0&&lat<53.8&&lng>6.5&&lng<10.0) return "NI";
+  if (lat>51.0&&lat<52.2&&lng>5.9&&lng<9.5) return "NW";
+  if (lat>50.2&&lat<51.8&&lng>11.8&&lng<15.2) return "SN";
+  if (lat>50.1&&lat<51.7&&lng>9.9&&lng<12.7) return "TH";
+  if (lat>49.4&&lat<51.6&&lng>7.8&&lng<10.3) return "HE";
+  if (lat>47.3&&lat<50.6&&lng>9.7) return "BY";
+  if (lat>47.5&&lat<49.8&&lng>7.5&&lng<10.5) return "BW";
+  if (lat>49.1&&lat<50.9&&lng>6.0&&lng<8.5) return "RP";
   return "DE";
 }
 
-function saveVisited(name, isAdd) {
-  localStorage.setItem("fs-visited", JSON.stringify([...VISITED]));
-  // Supabase sync
-  if (isAdd) sbAdd(name).catch(function(){ console.log("Sync fehlgeschlagen, lokal gespeichert"); });
-  else        sbRemove(name).catch(function(){ console.log("Sync fehlgeschlagen, lokal gespeichert"); });
-}
-
-function toggleVisited(name) {
-  if (VISITED.has(name)) VISITED.delete(name);
-  else VISITED.add(name);
-  var nowVisited = VISITED.has(name);
-  saveVisited(name, nowVisited);
-  updateProgress();
-  renderList();
-  // Signal-Marker aktualisieren
-  allMarkers.forEach(function(o) {
-    if (o.name === name) {
-      var baseAnn = ANN[name] || null;
-      var effAnn = (nowVisited && baseAnn !== "p" && baseAnn !== "i") ? "v" : baseAnn;
-      o.mk.setIcon(mkSignalIcon(o.status, effAnn));
-    }
-  });
-  // Highlight-Marker aktualisieren
-  allHighlights.forEach(function(o) {
-    if (o.name === name) {
-      o.mk.setIcon(mkHighlightIcon(o.kat, nowVisited));
-    }
-  });
-  // Filter neu anwenden (für Highlight-Sichtbarkeit)
-  allHighlights.forEach(function(o) {
-    if (activeH.has(o.kat)) { if (!theMap.hasLayer(o.mk)) o.mk.addTo(theMap); }
-    else                    { if ( theMap.hasLayer(o.mk)) theMap.removeLayer(o.mk); }
-  });
-  applyFilter();
-}
-
 function updateProgress() {
   var total = D.length + H.length;
   var done = 0;
-  D.forEach(function(r){ if (VISITED.has(r[0])) done++; });
-  H.forEach(function(r){ if (VISITED.has(r[0])) done++; });
+  D.forEach(function(r){if(VISITED.has(r[0]))done++;});
+  H.forEach(function(r){if(VISITED.has(r[0]))done++;});
   document.getElementById("lp-done").textContent = done;
   document.getElementById("lp-total").textContent = total;
-  document.getElementById("list-progress-fill").style.width = Math.round(done/total*100) + "%";
+  document.getElementById("list-progress-fill").style.width = (total?Math.round(done/total*100):0)+"%";
 }
 
-function populateLandDropdown() {
-  var lands = new Set();
-  D.forEach(function(r){ lands.add(r[4]); });
-  H.forEach(function(r){ lands.add(guessLand(r[2],r[3])); });
-  var sel = document.getElementById("fl-land");
-  var sorted = [...lands].filter(function(l){ return LAND_NAMES[l]; })
-    .sort(function(a,b){ return LAND_NAMES[a].localeCompare(LAND_NAMES[b]); });
-  sorted.forEach(function(l){
-    var o = document.createElement("option");
-    o.value = l; o.textContent = LAND_NAMES[l] || l;
-    sel.appendChild(o);
-  });
+function toggleVisited(name) {
+  if (VISITED.has(name)) { VISITED.delete(name); sbRemove(name); }
+  else                   { VISITED.add(name);    sbAdd(name);    }
+  saveLocal();
+  refreshMarkerIcons();
+  applyFilter();
+  updateProgress();
+  renderList();
 }
 
 function renderList() {
@@ -1241,38 +1045,30 @@ function renderList() {
   var fLand = document.getElementById("fl-land").value;
   var fKat  = document.getElementById("fl-kat").value;
   var fStat = document.getElementById("fl-status").value;
-  var body  = document.getElementById("list-body");
-
-  // Build unified list
-  var all = [];
+  var all   = [];
 
   if (!fKat || fKat === "signal") {
-    D.forEach(function(r){
-      var land = r[4];
+    D.forEach(function(r) {
+      var land = r[4], done = VISITED.has(r[0]);
       if (fLand && land !== fLand) return;
-      var done = VISITED.has(r[0]);
       if (fStat === "open" && done) return;
       if (fStat === "done" && !done) return;
-      if (q && r[0].toLowerCase().indexOf(q) < 0) return;
-      all.push({name:r[0], sub:r[5]+" · KBS "+r[6], land:land, kat:"signal", done:done});
+      if (q && r[0].toLowerCase().indexOf(q)<0) return;
+      all.push({name:r[0],sub:r[5]+" &middot; KBS "+r[6],land:land,done:done});
     });
   }
-
   if (!fKat || fKat !== "signal") {
-    H.forEach(function(r){
+    H.forEach(function(r) {
       if (fKat && fKat !== r[1]) return;
-      var land = guessLand(r[2],r[3]);
+      var land = guessLand(r[2],r[3]), done = VISITED.has(r[0]);
       if (fLand && land !== fLand) return;
-      var done = VISITED.has(r[0]);
       if (fStat === "open" && done) return;
       if (fStat === "done" && !done) return;
-      if (q && r[0].toLowerCase().indexOf(q) < 0) return;
-      var katLabel = HC[r[1]] ? HC[r[1]].lbl : r[1];
-      all.push({name:r[0], sub:katLabel+(r[4]?" · "+r[4]:""), land:land, kat:r[1], done:done});
+      if (q && r[0].toLowerCase().indexOf(q)<0) return;
+      all.push({name:r[0],sub:(HC[r[1]]?HC[r[1]].lbl:"")+(r[4]?" &middot; "+r[4]:""),land:land,done:done});
     });
   }
 
-  // Group by Bundesland
   var byLand = {};
   all.forEach(function(item){
     var l = LAND_NAMES[item.land] || item.land;
@@ -1281,32 +1077,44 @@ function renderList() {
   });
 
   var html = "";
-  Object.keys(byLand).sort().forEach(function(landName){
-    var items = byLand[landName];
-    var doneCount = items.filter(function(i){return i.done;}).length;
+  Object.keys(byLand).sort().forEach(function(lname){
+    var items = byLand[lname];
+    var dc = items.filter(function(i){return i.done;}).length;
     html += "<div class=\"list-group\">";
-    html += "<div class=\"list-group-header\">" + landName +
-      " <span style=\"font-weight:400;opacity:.6\">" + doneCount + "/" + items.length + "</span></div>";
+    html += "<div class=\"list-group-header\">"+lname+" <span style=\"font-weight:400;opacity:.6\">"+dc+"/"+items.length+"</span></div>";
     items.sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(item){
       var enc = item.name.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-      html += "<div class=\"list-item" + (item.done?" done":"") + "\" data-name=\"" + enc + "\">" +
-        "<div class=\"li-check\">" + (item.done?"&#10003;":"") + "</div>" +
-        "<div><div class=\"li-name\">" + item.name + "</div>" +
-        "<div class=\"li-sub\">" + item.sub + "</div></div></div>";
+      html += "<div class=\"list-item"+(item.done?" done":"")+"\" data-name=\""+enc+"\">" +
+        "<div class=\"li-check\">"+(item.done?"&#10003;":"")+"</div>" +
+        "<div><div class=\"li-name\">"+item.name+"</div><div class=\"li-sub\">"+item.sub+"</div></div></div>";
     });
     html += "</div>";
   });
-
-  if (!html) html = "<div style=\"text-align:center;padding:40px;color:#aaa;font-size:13px\">Keine Eintr&#228;ge</div>";
+  if (!html) html = "<div style=\"text-align:center;padding:40px;color:#aaa;font-size:13px\">Keine Eintr&#228;ge gefunden</div>";
+  var body = document.getElementById("list-body");
   body.innerHTML = html;
-  body.onclick = function(e) {
+  body.onclick = function(e){
     var item = e.target.closest(".list-item");
     if (item) toggleVisited(item.getAttribute("data-name"));
   };
 }
 
+function populateLandDropdown() {
+  var lands = new Set();
+  D.forEach(function(r){lands.add(r[4]);});
+  H.forEach(function(r){lands.add(guessLand(r[2],r[3]));});
+  var sel = document.getElementById("fl-land");
+  [...lands].filter(function(l){return LAND_NAMES[l];})
+    .sort(function(a,b){return (LAND_NAMES[a]||a).localeCompare(LAND_NAMES[b]||b);})
+    .forEach(function(l){
+      var o = document.createElement("option");
+      o.value=l; o.textContent=LAND_NAMES[l]||l;
+      sel.appendChild(o);
+    });
+}
+
 function showTab(tab) {
-  document.querySelectorAll(".tab").forEach(function(t){ t.classList.remove("active"); });
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});
   if (tab === "map") {
     document.getElementById("screen-map").style.display = "flex";
     document.getElementById("screen-list").style.display = "none";
@@ -1321,9 +1129,17 @@ function showTab(tab) {
   }
 }
 
+// Service Worker deregistrieren
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(reg){reg.unregister();});
+  });
+}
+
+// Init
+applyFilter();
 populateLandDropdown();
 loadFromSupabase();
-
 </script>
 </body>
 </html>

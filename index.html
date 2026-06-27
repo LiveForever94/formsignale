@@ -99,7 +99,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
     <span class="rl">Meine Karte:</span>
     <button class="chip off" id="cap" style="background:#2980b9" onclick="tog('a','p')">&#9658; Zeitnah besuchen <span class="n" id="nap">0</span></button>
     <button class="chip off" id="cai" style="background:#e6b800" onclick="tog('a','i')">&#9733; Interessant <span class="n" id="nai">0</span></button>
-    <button class="chip off" id="cav" style="background:#16a085" onclick="tog('a','v')">&#10003; Bereits besucht <span class="n" id="nav">0</span></button>
+    <button class="chip off" id="cav" style="background:#16a085" onclick="tog('a','v')">&#10003; Besucht <span class="n" id="nav">0</span></button>
   </div>
   <div class="fr">
     <span class="rl">Highlights:</span>
@@ -869,11 +869,13 @@ function mkSignalIcon(status, ann) {
   });
 }
 
-function mkHighlightIcon(kat) {
+function mkHighlightIcon(kat, visited) {
   var hc = HC[kat];
+  var badge = visited ? "<div style=\"position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:#16a085;border:1.5px solid #fff;border-radius:50%;\"></div>" : "";
+  var op = visited ? "opacity:.45;" : "";
   return L.divIcon({
     className:"",
-    html:"<div style=\"width:12px;height:12px;background:" + hc.col + ";border:1.5px solid " + hc.dark + ";transform:rotate(45deg);box-shadow:0 1px 3px rgba(0,0,0,.4);\"></div>",
+    html:"<div style=\"position:relative;width:12px;height:12px\"><div style=\"width:12px;height:12px;background:" + hc.col + ";border:1.5px solid " + hc.dark + ";transform:rotate(45deg);box-shadow:0 1px 3px rgba(0,0,0,.4);" + op + "\"></div>" + badge + "</div>",
     iconSize:[12,12], iconAnchor:[6,6], popupAnchor:[0,-8]
   });
 }
@@ -885,10 +887,11 @@ var cntA = {p:0,i:0,v:0};
 D.forEach(function(row) {
   var name=row[0],status=row[1],lat=row[2],lng=row[3],land=row[4],bahn=row[5],kbs=row[6],rem=row[7]||"";
   var ann = ANN[name] || null;
+  var effAnn = (VISITED.has(name) && ann !== "p" && ann !== "i") ? "v" : ann;
   var annKey = ann || "0";
   var sc = SC[status];
-  var ac = ann ? AC[ann] : null;
-  var mk = L.marker([lat,lng], {icon:mkSignalIcon(status,ann)});
+  var ac = effAnn ? AC[effAnn] : null;
+  var mk = L.marker([lat,lng], {icon:mkSignalIcon(status,effAnn)});
   mk.bindPopup(
     "<div class=\"pn\">" + name + "</div>" +
     "<div class=\"ps\">" + land + " &middot; " + bahn + " &middot; KBS " + kbs + "</div>" +
@@ -899,6 +902,7 @@ D.forEach(function(row) {
   allMarkers.push({mk:mk, status:status, ann:ann, annKey:annKey, name:name});
   cntS[status]++;
   if (ann) cntA[ann]++;
+  else if (VISITED.has(name)) cntA['v']++;
 });
 
 Object.keys(cntS).forEach(function(s){ document.getElementById("ns"+s).textContent = cntS[s]; });
@@ -910,14 +914,14 @@ var cntH = {b:0,m:0,f:0};
 H.forEach(function(row) {
   var name=row[0],kat=row[1],lat=row[2],lng=row[3],desc=row[4],url=row[5]||"";
   var hc = HC[kat];
-  var mk = L.marker([lat,lng], {icon:mkHighlightIcon(kat)});
+  var mk = L.marker([lat,lng], {icon:mkHighlightIcon(kat, VISITED.has(name))});
   mk.bindPopup(
     "<div class=\"pn\">" + name + "</div>" +
     "<span class=\"pb\" style=\"background:" + hc.col + "\">&#9670; " + hc.lbl + "</span>" +
     "<div class=\"pr\" style=\"margin-top:5px\">" + desc + "</div>" +
     (url ? "<div style=\"margin-top:5px\"><a href=\"" + url + "\" target=\"_blank\" style=\"font-size:11px;color:#2980b9\">" + url.replace("https://","") + "</a></div>" : "")
   );
-  allHighlights.push({mk:mk, kat:kat});
+  allHighlights.push({mk:mk, kat:kat, name:name});
   cntH[kat]++;
 });
 
@@ -1118,11 +1122,27 @@ function toggleVisited(name) {
   saveVisited();
   updateProgress();
   renderList();
+  var nowVisited = VISITED.has(name);
+  // Signal-Marker aktualisieren
   allMarkers.forEach(function(o) {
     if (o.name === name) {
-      o.mk.setIcon(mkSignalIcon(o.status, VISITED.has(name) ? "v" : (ANN[name]||null)));
+      var baseAnn = ANN[name] || null;
+      var effAnn = (nowVisited && baseAnn !== "p" && baseAnn !== "i") ? "v" : baseAnn;
+      o.mk.setIcon(mkSignalIcon(o.status, effAnn));
     }
   });
+  // Highlight-Marker aktualisieren
+  allHighlights.forEach(function(o) {
+    if (o.name === name) {
+      o.mk.setIcon(mkHighlightIcon(o.kat, nowVisited));
+    }
+  });
+  // Filter neu anwenden (für Highlight-Sichtbarkeit)
+  allHighlights.forEach(function(o) {
+    if (activeH.has(o.kat)) { if (!theMap.hasLayer(o.mk)) o.mk.addTo(theMap); }
+    else                    { if ( theMap.hasLayer(o.mk)) theMap.removeLayer(o.mk); }
+  });
+  applyFilter();
 }
 
 function updateProgress() {

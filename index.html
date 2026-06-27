@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formsignale in Deutschland</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a3558">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Formsignale">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;}
+#app{display:flex;flex-direction:column;height:100vh;}
+#header{background:linear-gradient(135deg,#0d1b2a,#1a3558);color:#fff;padding:9px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.hl{font-size:22px;}.ht h1{font-size:15px;font-weight:700;}.ht p{font-size:10px;opacity:.5;margin-top:1px;}
+#toolbar{background:#fff;border-bottom:2px solid #dee2e6;padding:5px 10px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.fr{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.rl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#aaa;min-width:90px;}
+.chip{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;border:none;color:#fff;transition:opacity .15s;user-select:none;}
+.chip.off{opacity:.2;}
+.chip .n{background:rgba(0,0,0,.22);border-radius:999px;padding:1px 5px;font-size:10px;}
+.dv{width:1px;height:18px;background:#dee2e6;margin:0 2px;}
+#sb{background:#f8f9fa;border-bottom:1px solid #dee2e6;padding:3px 12px;font-size:11px;color:#666;flex-shrink:0;}
+#map{flex:1;min-height:0;}
+.pn{font-size:13px;font-weight:700;color:#0d1b2a;margin-bottom:3px;}
+.ps{font-size:10px;color:#999;margin-bottom:2px;}
+.pb{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;}
+.pa{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;margin-left:3px;}
+.pr{font-size:10px;color:#666;font-style:italic;margin-top:3px;}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="header">
+  <div class="hl">&#x1F6A6;</div>
+  <div class="ht">
+    <h1>Formsignale in Deutschland</h1>
+    <p>Offline · Quelle: FormsignalBahnhofsVerzeichnis (hobby-eisenbahnfotografie.de)</p>
+  </div>
+</div>
+<div id="toolbar">
+  <div class="fr">
+    <span class="rl">DB-Status:</span>
+    <button class="chip off" id="cs1" style="background:#27ae60" onclick="tog('s',1)">&#9679; Aktiv <span class="n" id="ns1">0</span></button>
+    <button class="chip off" id="cs3" style="background:#e67e22" onclick="tog('s',3)">&#9681; Unsicher <span class="n" id="ns3">0</span></button>
+    <button class="chip off" id="cs5" style="background:#8e44ad" onclick="tog('s',5)">&#9680; &Auml;nd. geplant <span class="n" id="ns5">0</span></button>
+    <button class="chip off" id="cs7" style="background:#e74c3c" onclick="tog('s',7)">&#9684; &Auml;nd. laufend <span class="n" id="ns7">0</span></button>
+  </div>
+  <div class="fr">
+    <span class="rl">Meine Karte:</span>
+    <button class="chip off" id="cap" style="background:#2980b9" onclick="tog('a','p')">&#9658; Zeitnah besuchen <span class="n" id="nap">0</span></button>
+    <button class="chip off" id="cai" style="background:#e6b800" onclick="tog('a','i')">&#9733; Interessant <span class="n" id="nai">0</span></button>
+    <button class="chip off" id="cav" style="background:#16a085" onclick="tog('a','v')">&#10003; Bereits besucht <span class="n" id="nav">0</span></button>
+  </div>
+  <div class="fr">
+    <span class="rl">Highlights:</span>
+    <button class="chip off" id="chb" style="background:#c0392b" onclick="tog('h','b')">&#9670; Bauwerke <span class="n" id="nhb">0</span></button>
+    <button class="chip off" id="chm" style="background:#7f8c00" onclick="tog('h','m')">&#9670; Museumsbahnen <span class="n" id="nhm">0</span></button>
+    <button class="chip off" id="chf" style="background:#6c3483" onclick="tog('h','f')">&#9670; Fotospots <span class="n" id="nhf">0</span></button>
+  </div>
+</div>
+<div id="sb"><span id="sb-txt">Lade...</span></div>
+<div id="map"></div>
+</div>
+<script>
+"use strict";
+
+var SC = {
+  1:{col:"#27ae60",dark:"#1a6632",lbl:"Formsignale aktiv",sym:"&#9679;"},
+  3:{col:"#e67e22",dark:"#9a4000",lbl:"Zustand unsicher",sym:"&#9681;"},
+  5:{col:"#8e44ad",dark:"#5b2c6f",lbl:"&Auml;nderung geplant",sym:"&#9680;"},
+  7:{col:"#e74c3c",dark:"#922b21",lbl:"&Auml;nderung laufend",sym:"&#9684;"}
+};
+var AC = {
+  p:{col:"#2980b9",lbl:"Zeitnah besuchen",sym:"&#9658;"},
+  i:{col:"#e6b800",lbl:"Interessant",sym:"&#9733;"},
+  v:{col:"#16a085",lbl:"Bereits besucht",sym:"&#10003;"}
+};
+var HC = {
+  b:{col:"#c0392b",dark:"#922b21",lbl:"Bauwerk"},
+  m:{col:"#7f8c00",dark:"#4a5300",lbl:"Museumsbahn"},
+  f:{col:"#6c3483",dark:"#4a235a",lbl:"Fotospot"}
+};
+
+var ANN = {
+  // ── Zeitnah besuchen ──────────────────────────────────────────────────
+  "Hilchenbach":                     "p",
+  "Dillenburg":                      "p",
+  "Herdorf":                         "p",
+  "Langenhahn":                      "p",
+  "Hungen":                          "p",
+  "Mayen Ost":                       "p",
+  "Themar":                          "p",
+  "Barby":                           "p",
+  "Wiesenburg (Mark)":               "p",
+  "Wünschendorf (Elster)":           "p",
+  "Zwickau (Sachs) Gbf":             "p",
+  "Zwickau (Sachs) Hbf":             "p",
+  "Stammbach":                       "p",
+  "Luitpoldhütte":                   "p",
+  "Cunnersdorf (b Kamenz)":          "p",
+  "Lingen (Ems)":                    "p",
+  "Stickhausen-Velde (Ostfriesl.)":  "p",
+  "Estorf (Weser)":                  "p",
+  "Dannenberg Ost":                  "p",
+  "Hitzacker":                       "p",
+  "Wittingen":                       "p",
+  "Heiligendamm":                    "p",
+  "Grimmen":                         "p",
+  "Demmin":                          "p",
+  "Rheinsberg (Mark)":               "p",
+  "Joachimsthal":                    "p",
+  "Goldshöfe":                       "p",
+  "Storzingen":                      "p",
+  "Roßberg":                         "p",
+  "Bad Grönenbach":                  "p",
+  "Walleshausen":                    "p",
+  // ── Interessant ───────────────────────────────────────────────────────
+  "Ferndorf (Kr Siegen)":            "i",
+  "Biedenkopf":                      "i",
+  "Hachenburg":                      "i",
+  "Wilsenroth":                      "i",
+  "Siershahn":                       "i",
+  "Stadtallendorf":                  "i",
+  "Ehringshausen (Oberhess)":        "i",
+  "Großen Buseck":                   "i",
+  "Nieder Ohmen":                    "i",
+  "Lauterbach (Hess) Nord":          "i",
+  "Grünberg (Oberhess)":             "i",
+  "Wallenrod":                       "i",
+  "Bad Salzschlirf":                 "i",
+  "Großenlüder":                     "i",
+  "Hanau Hbf":                       "i",
+  "Kruft":                           "i",
+  "Schopp":                          "i",
+  "Straußfurt":                      "i",
+  "Wasserthaleben":                  "i",
+  "Bleicherode Ost":                 "i",
+  "Sangerhausen":                    "i",
+  "Thale Hbf":                       "i",
+  "Schladen (Harz)":                 "i",
+  "Wolfenbüttel":                    "i",
+  "Salzgitter-Ringelheim":           "i",
+  "Haldensleben":                    "i",
+  "Barleben":                        "i",
+  "Königsborn":                      "i",
+  "Triptis":                         "i",
+  "Greiz":                           "i",
+  "Borna (b Leipzig)":               "i",
+  "Tröglitz":                        "i",
+  "Lobenstein (Thür)":               "i",
+  "Rödental":                        "i",
+  "Ebersdorf (b Coburg)":            "i",
+  "Münchberg":                       "i",
+  "Windischeschenbach":              "i",
+  "Pressath":                        "i",
+  "Trabitz":                         "i",
+  "Parkstein-Hütten":                "i",
+  "Hiltersdorf":                     "i",
+  "Nabburg":                         "i",
+  "Freihöls":                        "i",
+  "Kothmaißling":                    "i",
+  "Mügeln (b Oschatz)":              "i",
+  "Leipzig-Schönefeld":              "i",
+  "Schlettau (Erzgeb)":              "i",
+  "Cranzahl":                        "i",
+  "Eilenburg Ost":                   "i",
+  "Beutersitz":                      "i",
+  // ── Interessant – Batch 3 ─────────────────────────────────────────────
+  "Bork (Westf)":                    "i",
+  "Wulfen (Westf.)":                 "i",
+  "Ratingen-West":                   "i",
+  "Ratingen-Ost":                    "i",
+  "Rheinkamp":                       "i",
+  "Neuss Gbf":                       "i",
+  "Düsseldorf-Derendorf Gbf":        "i",
+  "Mönchengladbach-Rheindahlen":     "i",
+  "Hanekenfähr":                     "i",
+  "Cloppenburg":                     "i",
+  "Augustfehn":                      "i",
+  "Cuxhaven":                        "i",
+  "Bielefeld Ost":                   "i",
+  "Rinteln":                         "i",
+  "Frille":                          "i",
+  "Soltau (Han)":                    "i",
+  "Schneverdingen":                  "i",
+  "Handeloh":                        "i",
+  "Hamburg-Blankenese":              "i",
+  "Dahlenburg":                      "i",
+  "Wahrenholz":                      "i",
+  "Karow (Meckl)":                   "i",
+  "Putbus":                          "i",
+  "Buckow (Märkische Schweiz)":      "i",
+  // ── Interessant – Batch 4 ─────────────────────────────────────────────
+  "Villingen (Schwarzw)":            "i",
+  "Dußlingen":                       "i",
+  "Mössingen":                       "i",
+  "Hausen i Tal":                    "i",
+  "Fridingen (b Tuttlingen)":        "i",
+  "Mengen":                          "i",
+  "Altshausen":                      "i",
+  "Bad Waldsee":                     "i",
+  "Überlingen Therme":               "i",
+  "Markdorf (Baden)":                "i",
+  "Dietmannsried":                   "i",
+  "Landsberg (Lech)":                "i",
+  "Eggling":                         "i",
+  "Gerlenhofen":                     "i",
+  "Hörpolding":                      "i",
+  "Trostberg":                       "i",
+  "Fridolfing":                      "i",
+  // ── Bereits besucht ───────────────────────────────────────────────────
+  "Altenkirchen (Westerwald)":       "v",
+  "Ingelbach":                       "v",
+  "Heimboldshausen":                 "v",
+  "Ober Widdersheim":                "v",
+  "Großauheim (Kr Hanau)":           "v",
+  "Winden (Pfalz)":                  "v",
+  "Kandel":                          "v",
+  "Zeitz Gbf":                       "v",
+  "Zeitz Pbf":                       "v",
+};
+
+var H = [
+  ["Göltzschtalbrücke","b",50.578,12.270,"Größte Ziegelsteinbrücke der Welt (1851) · 78m hoch, 574m lang · bei Mylau/Netzschkau","https://de.wikipedia.org/wiki/G%C3%B6ltzschtalviadukt"],
+  ["Elstertalbrücke","b",50.597,12.210,"Zweitgrößte Ziegelsteinbrücke Deutschlands (1851) · 68m hoch, 279m lang · bei Pirk","https://de.wikipedia.org/wiki/Elstertalviadukt"],
+  ["Harzer Schmalspurbahnen (HSB)","m",51.834,10.784,"140 km Dampfbahn-Streckennetz · täglich ganzjährig · Brocken, Wernigerode, Quedlinburg","https://www.hsb-wr.de"],
+  ["Rasender Roland – Rügen","m",54.357,13.473,"750 mm · Putbus–Göhren · täglich Mai–Okt, stündlich · 650.000 Fahrgäste/Jahr","https://www.ruegen-baederbahn.de"],
+  ["Mecklenburgische Bäderbahn Molli","m",54.106,11.897,"900 mm · Bad Doberan–Kühlungsborn · täglich ganzjährig · fährt durch Innenstadt Bad Doberan","https://www.molli-bahn.de"],
+  ["Fichtelbergbahn","m",50.416,12.956,"750 mm · Cranzahl–Oberwiesenthal · täglich ganzjährig · höchste Stadt Deutschlands","https://www.fichtelbergbahn.de"],
+  ["Lößnitzgrundbahn","m",51.108,13.656,"750 mm · Radebeul–Radeburg · täglich ganzjährig","https://www.loessnitzgrundbahn.de"],
+  ["Weißeritztalbahn","m",50.984,13.511,"750 mm · Freital-Hainsberg–Kurort Kipsdorf · täglich ganzjährig","https://www.weisseritztalbahn.de"],
+  ["Zittauer Schmalspurbahn","m",50.895,14.807,"750 mm · Zittau–Oybin und Jonsdorf · täglich ganzjährig","https://www.soeg-zittau.de"],
+  ["Döllnitzbahn (Wilder Robert)","m",51.300,13.106,"750 mm · Oschatz–Mügeln · wochentags Plandienst, WE mit Dampf","https://www.doellnitzbahn.de"],
+  ["Preßnitztalbahn","m",50.496,13.026,"750 mm · Steinbach–Jöhstadt · Mai–Okt an WE und Feiertagen","https://www.pressnitztalbahn.de"],
+  ["Waldeisenbahn Muskau","m",51.540,14.720,"600 mm · Weißwasser–Bad Muskau · größte 600-mm-Anlage Deutschlands","https://www.waldeisenbahn.de"],
+  ["Mansfelder Bergwerksbahn","m",51.528,11.548,"700 mm · älteste betriebsfähige Schmalspurbahn Deutschlands · Lutherstadt Eisleben","https://www.mansfelder-bergwerksbahn.de"],
+  ["Museumsbahn Schönheide","m",50.524,12.578,"750 mm · Stützengrün–Schönheide · 3,9 km · WE und Feiertage","https://www.museumsbahn-schoenheide.de"],
+  ["Pollo – Schmalspurbahn der Prignitz","m",53.366,13.516,"600 mm · Lindenberg · saisonaler Betrieb","https://www.pollo.de"],
+  ["Erste Museums-Eisenbahn Deutschlands","m",52.826,8.996,"Normalspur · Bruchhausen-Vilsen–Asendorf · älteste Museumsbahn Deutschlands (1966)","https://www.museumseisenbahn.de"],
+  ["Selfkantbahn","m",51.030,6.065,"1000 mm · Gillrath–Schierwaldenrath · westlichste Eisenbahn Deutschlands","https://www.selfkantbahn.de"],
+  ["Sauschwänzlebahn (Wutachtalbahn)","m",47.852,8.530,"Normalspur · Blumberg · spektakuläre Kreisbahn durch Wutachschlucht","https://www.sauschwaenzlebahn.de"],
+  ["Härtsfeld-Museumseisenbahn","m",48.754,10.335,"1000 mm · Neresheim–Sägmühle · WE und Feiertage im Sommer","https://www.haertsfeld-museumsbahn.de"],
+  ["Bayerisches Eisenbahnmuseum Nördlingen","m",48.851,10.488,"Normalspur · großes Freiluftmuseum mit Dampfloks und Sonderfahrten","https://www.bayerisches-eisenbahnmuseum.de"],
+  ["Dampfbahn Fränkische Schweiz","m",49.779,11.178,"Normalspur · Ebermannstadt–Behringersmühle · saisonaler Dampfbetrieb","https://www.dampfbahn-fraenkische-schweiz.de"],
+  ["Hessencourier","m",51.317,9.493,"Normalspur · Kassel–Naumburg (Hessen) · historische Fahrzeuge, saisonale Fahrten","https://www.hessencourier.de"],
+  ["Öchsle Bahn","m",48.073,9.882,"750 mm · Warthausen–Ochsenhausen · Mai–Okt an WE und Feiertagen","https://www.oechsle-bahn.de"],
+  // ── Fotospots NRW ─────────────────────────────────────────────────────
+  ["Bochum – Förderturm","f",51.481,7.222,"Förderturm als Industriekulisse"],
+  ["Essen Steele – Brücke","f",51.456,7.077,"Markante Brücke"],
+  ["Herne – Dampfspeicherlok","f",51.537,7.216,"Dampfspeicherlok"],
+  ["Duisburg Marxloh – Industriekulisse","f",51.510,6.743,"Industriekulisse Marxloh"],
+  ["Duisburg Baerl – Brücke","f",51.465,6.694,"Brücke"],
+  ["Rheinhausen – Brücke","f",51.434,6.730,"Brücke Rheinhausen"],
+  ["Angertalbahn – interessante Strecke","f",51.275,6.892,"Interessante Strecke Angertalbahn"],
+  ["Düsseldorf-Rath – Signale","f",51.271,6.835,"Formsignale"],
+  ["Düsseldorf-Mörsenbroich – Signale","f",51.262,6.804,"Formsignale"],
+  ["Düsseldorf-Langerstraße – Häuserschlucht","f",51.225,6.795,"Häuserschlucht"],
+  ["Düsseldorf-Völklinger Straße – Signale","f",51.210,6.790,"Formsignale"],
+  ["Neuss – Brücke","f",51.198,6.686,"Brücke"],
+  ["Neuss Rheinhafen – Hafenkulisse","f",51.203,6.672,"Hafenkulisse Rheinhafen"],
+  ["Büttgen – Windmühle","f",51.234,6.632,"Windmühle"],
+  ["Krefeld Bf – Bahnhof","f",51.334,6.561,"Bahnhof Krefeld"],
+  ["Aldekerk – Kirchenblick","f",51.480,6.419,"Kirchenblick"],
+  ["Düren – Brücke","f",50.804,6.487,"Brücke"],
+  ["Eschweiler-Weißweiler – Industriekulisse","f",50.832,6.283,"Industriekulisse"],
+  ["Eschweiler – Bahnhof","f",50.819,6.268,"Bahnhof"],
+  ["Aachen – Tunnel","f",50.768,6.091,"Tunnel"],
+  ["Aachen Bf – Bahnhof","f",50.771,6.094,"Bahnhof Aachen"],
+  ["Aachen – Landschaft","f",50.760,6.085,"Landschaft"],
+  ["Hausen bei Düren – Landschaft","f",50.667,6.477,"Landschaft Rurtal"],
+  ["Blens – Landschaft","f",50.577,6.482,"Landschaft"],
+  ["Olef – Ortsdurchfahrt","f",50.467,6.474,"Ortsdurchfahrt"],
+  ["Wuppertal – Schwebebahn","f",51.257,7.149,"Schwebebahn als Fotomotiv"],
+  ["Ennepetal – Felswand","f",51.294,7.361,"Felswand"],
+  ["Meinerzhagen – Brücke","f",51.104,7.640,"Brücke"],
+  ["Loope – Stauwerk","f",51.073,7.669,"Stauwerk"],
+  ["Olpe – Stausee","f",51.028,7.851,"Biggesee Stausee"],
+  ["Hagen Bf – Bahnhof","f",51.361,7.462,"Bahnhof Hagen"],
+  ["Wetter – Landschaft","f",51.388,7.392,"Landschaft Ruhrtal"],
+  ["Witten – Viadukt","f",51.443,7.353,"Viadukt · Edertal-Bahnstrecke sehr schön"],
+  ["Witten – Landschaft","f",51.440,7.350,"Landschaft Ruhrtal"],
+  ["Herbede – Ruine","f",51.412,7.325,"Burgruine Hardenstein"],
+  ["Duisburg Ruhrbrücke","f",51.430,6.758,"Ruhrbrücke"],
+  ["Herdecke – Viadukt","f",51.403,7.433,"Viadukt"],
+  ["Klusenstein – Tunnelausfahrt","f",51.404,7.475,"Tunnelausfahrt"],
+  ["Klusenstein – Brücke","f",51.402,7.474,"Brücke"],
+  ["Werdohl – Brücke","f",51.258,7.769,"Brücke"],
+  // ── Fotospots Thüringen & Sachsen ─────────────────────────────────────
+  ["Breternitz – Stadtblick","f",50.696,11.417,"Stadtblick"],
+  ["Sättelstädt – Kirchblick","f",51.010,10.378,"Kirchblick"],
+  ["Haarhausen – Burgblick","f",50.910,11.000,"Burgblick"],
+  ["Themar – Bahnhof","f",50.497,10.628,"Bahnhof"],
+  ["Göltzschtalbrücke","f",50.578,12.270,"Größte Ziegelsteinbrücke der Welt · 78m hoch"],
+  ["Katzhütte – km 641","f",50.567,11.107,"Streckenkilometer 641"],
+  ["Paulinzella – Landschaft","f",50.700,11.159,"Landschaft · Klosterruine"],
+  ["Wünschendorf – Bahnhof","f",50.800,12.091,"Bahnhof"],
+  ["Straußfurt – Bahnhof","f",51.190,10.997,"Bahnhof"],
+  ["Wasserthaleben – Bahnhof","f",51.364,10.818,"Bahnhof"],
+  ["Wurzbach – Viadukt","f",50.432,11.510,"Viadukt (unbestätigt)"],
+  ["Lobenstein – Bahnhof","f",50.454,11.640,"Bahnhof (unbestätigt)"],
+  ["Caaschwitz – Signal","f",50.863,12.106,"Formsignal"],
+  ["Triptis – Bahnhof","f",50.749,11.788,"Bahnhof"],
+  ["Herringen – Bahnhof","f",50.736,12.030,"Bahnhof"],
+  ["Weischlitz – Bahnhof","f",50.566,12.073,"Bahnhof"],
+  ["Pirk – Stausee","f",50.533,12.132,"Talsperre Pirk"],
+  ["Pirk – Elstertalbrücke","f",50.597,12.210,"Zweitgrößte Ziegelsteinbrücke Deutschlands · 68m hoch"],
+  ["Plauen – Viadukt","f",50.496,12.136,"Viadukt Plauen"],
+  ["Jocketa – Elstertalbrücke","f",50.546,12.158,"Elstertalbrücke Jocketa"],
+  ["Steinpleis bei Werdau – Viadukt","f",50.742,12.379,"Viadukt"],
+  ["Neuwürschnitz – Viadukt","f",50.637,12.868,"Viadukt"],
+  ["Zwickau – Bahnhof","f",50.717,12.496,"Bahnhof Zwickau"],
+  ["Thalheim – Bahnhof","f",50.658,12.854,"Bahnhof"],
+  ["Scharfenstein – Burg","f",50.641,13.010,"Burg Scharfenstein"],
+  ["Wolkenstein – Bahnhof","f",50.648,13.026,"Bahnhof"],
+  ["Obernhau-Grünthal – Brücke","f",50.753,13.178,"Brücke"],
+  ["Neuenhausen-Ditterbach – Bahnhof","f",50.780,13.232,"Bahnhof"],
+  ["Bienenmühle – Bahnhof","f",50.741,13.335,"Bahnhof"],
+  ["Mulda – Bahnhof","f",50.796,13.282,"Bahnhof"],
+  ["Berthelsdorf – Bahnhof","f",50.893,13.405,"Bahnhof"],
+  ["Chemnitz Grünau – Kirche","f",50.832,12.851,"Kirche Grünau"],
+  ["Roda – Brücke","f",51.076,12.735,"Brücke"],
+  ["Kössern – Brücke","f",51.208,12.729,"Brücke"],
+  ["Waldheim – Viadukt","f",51.072,13.019,"Viadukt"],
+  ["Göhrener Viadukt","f",50.976,12.772,"Göhrener Viadukt"],
+  ["Hetzdorf – Bahnhof mit Viadukt","f",50.943,13.124,"Bahnhof mit Viadukt"],
+  ["Rauenstein – Burg","f",50.481,11.134,"Burg Rauenstein"],
+  ["Frankenstein – Viadukt","f",50.864,13.227,"Viadukt"],
+  ["Nossen – Bahnhof","f",51.056,13.296,"Bahnhof"],
+  ["Weißig – Bahnhof","f",51.115,13.498,"Bahnhof (unbestätigt)"],
+  ["Glaubitz – Bahnhof","f",51.318,13.434,"Bahnhof (unbestätigt)"],
+  ["Röderau – Bahnhof","f",51.389,13.289,"Bahnhof (unbestätigt)"],
+  ["Cossebaude – Bahnhof","f",51.098,13.631,"Bahnhof (unbestätigt)"],
+  ["Radebeul Ost – Schmalspur","f",51.108,13.706,"Schmalspurbahn Lößnitzgrundbahn"],
+  ["Colmnitz – Viadukt","f",50.958,13.467,"Viadukt"],
+  ["Muldenhütten – Viadukt","f",50.930,13.163,"Viadukt"],
+  // ── Fotospots Sachsen – Kamenz/Radeberg Region ────────────────────────
+  ["Hosena – Signale","f",51.435,14.052,"Formsignale"],
+  ["Schwarzkollm – Bahnhof","f",51.357,14.108,"Bahnhof"],
+  ["Straßengräbchen – Bahnhof","f",51.299,14.099,"Bahnhof (unbestätigt)"],
+  ["Kamenz – Kirche","f",51.268,14.099,"Kirche"],
+  ["Kamenz – Ortsdurchfahrt","f",51.270,14.097,"Ortsdurchfahrt"],
+  ["Cunnersdorf (b Kamenz) – Formsignale","f",51.261,14.165,"Formsignale"],
+  ["Radeberg – Wasserturm","f",51.120,13.912,"Wasserturm"],
+  ["Wiednitz – Bahnhof","f",51.388,14.073,"Bahnhof (unbestätigt)"],
+  ["Putzkau – Viadukt","f",51.108,14.237,"Viadukt"],
+  // ── Fotospots Sachsen – Oberlausitz ───────────────────────────────────
+  ["Demitz-Thumitz – Viadukt","f",51.174,14.258,"Viadukt"],
+  ["Obercunnersdorf – Viadukt","f",50.975,14.727,"Viadukt"],
+  ["Ebersbach (Sachs) – Viadukt","f",51.004,14.595,"Viadukt"],
+  ["Oberroderwitz – Viadukt","f",50.994,14.660,"Viadukt (unbestätigt)"],
+  ["Hainewald – Viadukt","f",51.011,14.697,"Viadukt"],
+  ["Görlitz – Bahnhof","f",51.152,14.993,"Bahnhof Görlitz"],
+  ["Görlitz – Viadukt","f",51.157,14.985,"Viadukt"],
+  ["Klitten – Bahnhof","f",51.460,14.513,"Bahnhof (unbestätigt)"],
+  ["Weißwasser – Telegrafenmasten","f",51.502,14.637,"Telegrafenmasten (unbestätigt)"],
+  ["Weißkeißel – Bahnhof","f",51.530,14.688,"Bahnhof (unbestätigt)"],
+  ["Uhsmannsdorf – Bahnhof","f",51.445,14.748,"Bahnhof (unbestätigt)"],
+  ["Hoyerswerda – Bahnhof","f",51.435,14.252,"Bahnhof (unbestätigt)"],
+  ["Horka – Telegrafenmasten","f",51.338,14.913,"Telegrafenmasten (unbestätigt)"],
+  ["Mückenhain – Telegrafenmasten","f",51.370,14.870,"Telegrafenmasten (unbestätigt)"],
+  // ── Fotospots Brandenburg ─────────────────────────────────────────────
+  ["Kahla – Stellwerk","f",52.156,13.822,"Stellwerk"],
+  ["Bärhaus – Schrankenposten","f",52.180,13.850,"Schrankenposten (unbestätigt)"],
+  ["Schwarzbach – Schranke","f",52.290,13.780,"Schranke (unbestätigt)"],
+  ["Beeskow – Bahnhof","f",52.170,14.244,"Bahnhof (unbestätigt)"],
+  ["Lindenberg-Glienicke – Bahnhof","f",52.658,13.600,"Bahnhof"],
+  ["Wildau – Fabrik","f",52.315,13.629,"Fabrikkulisse"],
+  ["Beutersitz – Signal","f",52.992,13.218,"Formsignal"],
+  ["Potsdam – Bahnhof","f",52.391,13.067,"Bahnhof Potsdam"],
+  ["Potsdam – Brücke","f",52.400,13.060,"Brücke"],
+  ["Kirchmöser – Streckenkreuzung","f",52.393,12.380,"Streckenkreuzung"],
+  ["Görden – Streckenkreuzung","f",52.398,12.358,"Streckenkreuzung"],
+  ["Kremmen – Bahnhof","f",52.762,12.992,"Bahnhof"],
+  ["Herzberg (Mark) – Bahnhof","f",51.690,13.234,"Bahnhof (unbestätigt)"],
+  ["Alt Ruppin – Bahnhof","f",52.922,12.796,"Bahnhof (unbestätigt)"],
+  ["Wutike – Bahnhof","f",52.965,12.600,"Bahnhof (unbestätigt)"],
+  ["Blumenthal – Bahnhof","f",52.987,12.554,"Bahnhof"],
+  ["Perleberg – V200","f",53.074,11.862,"V200-Diesellok als Motiv"],
+  ["Brügge – Bahnhof","f",53.057,11.900,"Bahnhof"],
+  ["Meyenburg – Bahnhof","f",53.326,12.254,"Bahnhof"],
+  ["Liebenthal – Bahnhof","f",53.090,12.650,"Bahnhof (unbestätigt)"],
+  ["Tantow – Bahnhof","f",53.056,14.294,"Bahnhof"],
+  ["Joachimsthal – Signal","f",52.988,13.762,"Formsignal (unbestätigt)"],
+  ["Joachimsthal – Bahnhof","f",52.985,13.760,"Bahnhof"],
+  ["Wiesenburg – Bahnhof","f",52.066,12.441,"Bahnhof"],
+  ["Reetz – Bahnübergang","f",52.086,12.583,"Bahnübergang (unbestätigt)"],
+  // ── Fotospots Mecklenburg-Vorpommern ──────────────────────────────────
+  ["Anklam – Brücke","f",53.856,13.700,"Brücke (unbestätigt)"],
+  ["Dolgen – Bahnhof","f",53.648,12.528,"Bahnhof (unbestätigt)"],
+  ["Feldberg – Bahnhof","f",53.338,13.430,"Bahnhof (unbestätigt)"],
+  ["Malchin – Stellwerk","f",53.742,12.773,"Stellwerk (unbestätigt)"],
+  ["Teterow – Bahnhof","f",53.776,12.570,"Bahnhof (unbestätigt)"],
+  ["Hoppenrade – Bahnhof","f",53.648,11.660,"Bahnhof (unbestätigt)"],
+  ["Klein Grabow – Bahnhof","f",53.530,11.740,"Bahnhof (unbestätigt)"],
+  ["Krakow – Bahnhof","f",53.655,12.283,"Bahnhof"],
+  ["Karow (Meckl) – Bahnhof","f",53.543,12.265,"Bahnhof (unbestätigt)"],
+  ["Plau am See – Bahnhof","f",53.449,12.274,"Bahnhof (unbestätigt)"],
+  ["Ganzlin – Bahnhof","f",53.584,12.223,"Bahnhof (unbestätigt)"],
+  ["Lüdersdorf – Blockstelle","f",53.789,10.914,"Blockstelle"],
+  ["Lüdersdorf – Bahnhof","f",53.792,10.916,"Bahnhof"],
+  ["Grieben – Bahnhof","f",53.810,10.950,"Bahnhof"],
+  ["Grevesmühlen – Telegrafenmasten","f",53.864,11.195,"Telegrafenmasten"],
+  ["Grevesmühlen – Bahnhof","f",53.866,11.197,"Bahnhof"],
+  ["Naschendorf – Brücke","f",53.878,11.240,"Brücke"],
+  ["Sandhagen – Bahnhof","f",54.010,12.580,"Bahnhof (unbestätigt)"],
+  ["Dabel – Windmühle","f",53.699,11.894,"Windmühle"],
+  ["Malchow – Bahnhof","f",53.474,12.422,"Bahnhof (unbestätigt)"],
+  ["Nossentin – Bahnhof","f",53.508,12.478,"Bahnhof (unbestätigt)"],
+  ["Neustrelitz – Bahn auf Straße","f",53.361,13.073,"Bahn auf Straße"],
+  ["Putbus – Landschaft","f",54.362,13.478,"Landschaft"],
+  ["Putbus – Bahnhof","f",54.357,13.473,"Bahnhof Rasender Roland"],
+  ["Rövershagen – Windmühle","f",54.167,12.207,"Windmühle"],
+  ["Demmin – Bahnhof","f",53.912,13.044,"Bahnhof"],
+  ["Grimmen – Bahnhof","f",54.117,13.042,"Bahnhof"],
+  ["Wüstenfelde – Bahnhof","f",54.030,12.910,"Bahnhof (unbestätigt)"],
+  ["Altena – Burg","f",51.299,7.668,"Burg Altena"],
+  ["Rudersdorf – Brücke","f",50.977,8.000,"Brücke"],
+  ["Geisweid – Kirchblick","f",50.898,8.047,"Kirchblick"],
+  ["Kredenbach – Formsignal","f",50.945,8.050,"Formsignal"],
+  ["Hilchenbach – Formsignal","f",51.003,8.106,"Formsignal · Edertal-Bahnstrecke sehr schön"],
+  ["Blankenberg – Landschaft","f",50.770,7.530,"Landschaft"],
+  ["Benolpe – Landschaft","f",51.075,7.890,"Landschaft"],
+  ["Hofolpe – Landschaft","f",51.089,7.895,"Landschaft"],
+  ["Winterberg – Hamster","f",51.200,8.530,"Hamster (Motiv)"],
+  ["Olsberg – Landschaft","f",51.352,8.494,"Landschaft"],
+  ["Velmede – Landschaft","f",51.357,8.452,"Landschaft"],
+  ["Gudenhagen – Tunnel","f",51.363,8.420,"Tunnel"],
+  ["Nuttlar – Kirchblick","f",51.381,8.457,"Kirchblick"],
+  ["Freienohl – Tunnel","f",51.374,8.419,"Tunnel"],
+  ["Arnsberg – Viadukt","f",51.398,8.071,"Viadukt"],
+  ["Remscheid-Lütringhausen – Bahnhof","f",51.188,7.196,"Bahnhof"],
+];
+
+var D = [
+["Abelitz",1,52.584,9.798,"NI","DB AG","395"],
+["Ahlem",1,52.376,9.679,"NI","DB AG","---","Bbf Umfahrung Hannover"],
+["Aichach",1,48.460,11.133,"BY","DB AG","983"],
+["Aken (Elbe)",1,51.854,12.044,"ST","DB AG","342"],
+["Altenkirchen (Westerwald)",1,50.689,7.645,"RP","DB AG","461"],
+["Altenstadt (Iller)",1,47.988,10.102,"BY","DB AG","975"],
+["Altshausen",7,47.941,9.543,"BW","DB AG","766"],
+["Augustfehn",1,53.183,7.877,"NI","DB AG","390"],
+["Auma",3,50.693,12.029,"TH","DB AG","556","ohne Asig, demontiert"],
+["Bad Bodenteich",1,52.839,10.718,"NI","DB AG","115"],
+["Bad Grönenbach",1,47.875,10.233,"BY","DB AG","975"],
+["Bad Herrenalb",1,48.800,8.442,"BW","AVG","711"],
+["Bad Mergentheim",5,49.498,9.774,"BW","DB AG","782"],
+["Bad Salzschlirf",1,50.549,9.145,"HE","DB AG","635"],
+["Bad Waldsee",7,47.922,9.752,"BW","DB AG","753"],
+["Barby",1,51.957,11.884,"ST","DB AG","258"],
+["Bärenstein (b Glashütte/Sachs)",1,50.813,13.840,"SN","DB AG","246"],
+["Barleben",1,52.200,11.617,"ST","DB AG","308"],
+["Bartmannsholte",1,52.474,7.564,"NI","DB AG","392"],
+["Beienheim",5,50.352,8.862,"HE","DB AG","632"],
+["Bergisch Gladbach",5,51.000,7.138,"NW","DB AG","450.11"],
+["Berlin Wuhlheide PE Bahnbetriebswerk",1,52.475,13.555,"BE","BPE","12299","Parkeisenbahn"],
+["Berlin Wuhlheide PE Hauptbahnhof",1,52.476,13.553,"BE","BPE","12299","Parkeisenbahn"],
+["Berlin-Neukölln",5,52.478,13.428,"BE","DB AG","200.4"],
+["Bernburg",1,51.797,11.728,"ST","DB AG","334"],
+["Berthelsdorf (Erzgeb)",1,50.893,13.405,"SN","DB AG","514","zeitweise durchgeschaltet"],
+["Bertsdorf",1,50.882,14.797,"SN","SOEG","238","Ohne Asig; Negativflügel"],
+["Beutersitz",1,52.992,13.218,"BB","DB AG","215"],
+["Biedenkopf",1,50.911,8.531,"HE","DB AG","623"],
+["Bielefeld Ost",1,52.009,8.577,"NW","DB AG","404"],
+["Biendorf",1,51.820,11.623,"ST","DB AG","334","Bk"],
+["Bleicherode Ost",1,51.449,10.586,"TH","DB AG","600","Teilweise LSig"],
+["Blumberg-Zollhaus",1,47.852,8.530,"BW","BB","12737","Wutachtalbahn"],
+["Bork (Westf)",1,51.646,7.520,"NW","DB AG","412"],
+["Borna (b Leipzig)",1,51.127,12.493,"SN","DB AG","507"],
+["Bottrop Süd",1,51.510,6.925,"NW","DB AG","---"],
+["Braunschweig Rbf",1,52.273,10.527,"NI","DB AG","310"],
+["Bremen Rbf",1,53.072,8.823,"HB","DB AG","---"],
+["Buckow (Märkische Schweiz)",1,52.569,14.063,"BB","EMS","206.29"],
+["Burgheim",1,48.696,11.010,"BY","DB AG","993"],
+["Bürstadt",1,49.632,8.456,"HE","DB AG","653"],
+["Caaschwitz",1,50.863,12.106,"TH","DB AG","550","Bk"],
+["Calbe (Saale) West",1,51.905,11.786,"ST","DB AG","341"],
+["Chemnitz PE Tennisplätze",1,50.836,12.907,"SN","PEC","12248","Parkeisenbahn, Bk"],
+["Chemnitz-Hilbersdorf Sächs. Eisenbahnmuseum",1,50.855,12.897,"SN","SEM","510","1 Formsignal"],
+["Cloppenburg",1,52.844,8.041,"NI","DB AG","392"],
+["Cottbus PE Zoo",1,51.758,14.326,"BB","CPE","---","Parkeisenbahn"],
+["Cranzahl",1,50.551,13.054,"SN","DB AG","518","2005 aufgestellt"],
+["Cunnersdorf (b Kamenz)",1,51.261,14.165,"SN","DB AG","227"],
+["Cuxhaven",1,53.877,8.692,"NI","DB AG","121"],
+["Dahlbruch",1,51.001,8.119,"NW","DB AG","443"],
+["Dahlenburg",1,53.182,10.735,"NI","DB AG","112"],
+["Dalheim",1,51.017,6.515,"NW","DB AG","487"],
+["Dannenberg Ost",1,53.093,11.101,"NI","DB AG","112"],
+["Demmin",1,53.912,13.044,"MV","DB AG","205"],
+["Deutschenbora",1,51.258,13.082,"SN","DB AG","506"],
+["Dietmannsried",1,47.804,10.314,"BY","DB AG","975"],
+["Dillenburg",1,50.735,8.289,"HE","DB AG","445"],
+["Dingolfing",1,48.631,12.498,"BY","DB AG","931"],
+["Dortmund-Rahm Abzw",1,51.484,7.372,"NW","DB AG","426","Abzweigstelle"],
+["Dresden PE Carolasee",1,51.055,13.741,"SN","DPE","12249","Parkeisenbahn"],
+["Dresden PE Karcherallee",1,51.050,13.745,"SN","DPE","12249","Parkeisenbahn"],
+["Dresden-Gittersee",1,51.022,13.721,"SN","PP","---"],
+["Duisburg-Hochfeld Süd Mannesmann",1,51.440,6.762,"NW","DB AG","---"],
+["Durmersheim",5,48.941,8.271,"BW","DB AG","702"],
+["Dußlingen",1,48.507,9.044,"BW","DB AG","766"],
+["Düsseldorf Abstellbahnhof",5,51.222,6.817,"NW","DB AG","---","Abstellbahnhof"],
+["Düsseldorf-Derendorf Gbf",1,51.249,6.777,"NW","DB AG","---"],
+["Düsseldorf-Rath",5,51.271,6.835,"NW","DB AG","450.6"],
+["Ebersdorf (b Coburg)",5,50.221,11.012,"BY","DB AG","830"],
+["Eddersheim",5,50.027,8.553,"HE","DB AG","645.1","Bk"],
+["Eggenfelden",1,48.406,12.761,"BY","DB AG","946"],
+["Eggling",1,47.853,11.555,"BY","DB AG","985"],
+["Ehringshausen (Oberhess)",1,50.598,8.392,"HE","DB AG","635"],
+["Eilenburg Ost",1,51.447,12.656,"SN","DB AG","215"],
+["Elsterberg",5,50.583,12.162,"SN","DB AG","541","ESig versetzt 2015"],
+["Emden Außenhafen",1,53.340,7.190,"NI","DB AG","396"],
+["Emmerthal",1,52.040,9.475,"NI","DB AG","363.3"],
+["Epfenhofen",1,47.722,8.537,"BW","BB","12737","Wutachtalbahn"],
+["Essen-Vogelheim",1,51.498,6.987,"NW","DB AG","---"],
+["Estorf (Weser)",1,52.534,9.297,"NI","DB AG","124"],
+["Falkenberg (Elster) ob Bf",1,51.582,13.229,"BB","DB AG","215"],
+["Ferndorf (Kr Siegen)",1,50.977,7.986,"NW","DB AG","443"],
+["Flechtingen",1,52.337,11.196,"ST","DB AG","308"],
+["Freihöls",1,49.475,12.080,"BY","DB AG","870"],
+["Fridingen (b Tuttlingen)",1,48.019,8.916,"BW","DB AG","755"],
+["Friedensdorf (Lahn)",1,50.948,8.462,"HE","DB AG","623"],
+["Friedewald (Kr Dresden) Bad",1,51.011,14.148,"SN","SDG","509"],
+["Frille",1,52.314,8.977,"NW","DB AG","124"],
+["Fürstenzell",1,48.514,13.315,"BY","DB AG","946"],
+["Fützen",1,47.730,8.520,"BW","BB","12737","Wutachtalbahn – Durchfahrtssignal"],
+["Ganzlin",1,53.584,12.223,"MV","DB AG","174"],
+["Gehofen",1,51.329,11.362,"TH","DB AG","585"],
+["Geiselhöring",1,48.751,12.374,"BY","DB AG","932","Nur ESig"],
+["Gera PE Martinsgrund",1,50.870,12.077,"TH","PEG","---","Parkeisenbahn"],
+["Gera PE Wolfsgehege",1,50.877,12.080,"TH","PEG","---","Parkeisenbahn"],
+["Gerlenhofen",1,48.316,10.005,"BY","DB AG","975"],
+["Gießen Gbf",1,50.584,8.665,"HE","DB AG","620"],
+["Gießen-Bergwald",1,50.574,8.660,"HE","DB AG","630","Nur 3 Formsignale"],
+["Gifhorn Stadt",1,52.489,10.543,"NI","DB AG","115"],
+["Goldshöfe",5,48.893,10.131,"BW","DB AG","786"],
+["Greiz",5,50.657,12.199,"TH","DB AG","541"],
+["Grenzau",1,50.461,7.619,"RP","EVG","421ex","Museumsbahn"],
+["Grimmelshofen",1,47.743,8.467,"BW","BB","12737","Wutachtalbahn – Flügelsignal"],
+["Grimmen",1,54.117,13.042,"MV","DB AG","205"],
+["Groß Ammensleben",1,52.205,11.384,"ST","DB AG","308"],
+["Großauheim (Kr Hanau)",5,50.109,8.980,"HE","DB AG","640","ESTW Hanau geplant"],
+["Großbothen",1,51.290,12.744,"SN","DB AG","506","ab 2010 ESTW, 1 Form-Asig als Zielsignal"],
+["Großen Buseck",1,50.571,8.716,"HE","DB AG","635"],
+["Großenkneten",1,52.930,8.254,"NI","DB AG","392"],
+["Großenlüder",1,50.582,9.531,"HE","DB AG","635"],
+["Grünberg (Oberhess)",1,50.593,8.957,"HE","DB AG","635"],
+["Guben Nord",1,51.964,14.720,"BB","DB AG","211","Abzw"],
+["Hachenburg",1,50.665,7.819,"RP","DB AG","461"],
+["Hadamar",1,50.447,8.059,"HE","DB AG","461"],
+["Haldensleben",1,52.289,11.406,"ST","DB AG","308"],
+["Hamburg Hochkamp",1,53.566,9.853,"HH","DB AG","101.1","Hp Bk"],
+["Hamburg-Blankenese",1,53.561,9.800,"HH","DB AG","101.1"],
+["Hamburg-Eidelstedt",5,53.605,9.920,"HH","DB AG","130"],
+["Hamburg-Klein Flottbek",1,53.567,9.869,"HH","DB AG","101.1"],
+["Hamburg-Sülldorf",1,53.556,9.781,"HH","DB AG","101.1"],
+["Handeloh",1,53.183,9.998,"NI","DB AG","123"],
+["Hanau Hbf",5,50.134,8.917,"HE","DB AG","640"],
+["Hanekenfähr",1,52.499,7.345,"NI","DB AG","395"],
+["Haselbach",1,50.855,12.412,"TH","VKB","---"],
+["Hausen i Tal",1,48.024,8.872,"BW","DB AG","755"],
+["Heiligendamm",1,54.143,11.845,"MV","MBB","157","Nur ESig; Negativflügel"],
+["Heimbach (Eifel)",1,50.628,6.471,"NW","RTB","484"],
+["Heimboldshausen",1,50.994,9.894,"HE","DB AG","576ex"],
+["Heimsen",1,52.357,8.897,"NW","DB AG","124"],
+["Hennigsdorf (b Berlin)",1,52.634,13.205,"BB","Alstm","---","Prüfstrecke Velten"],
+["Herdorf",1,50.773,7.952,"RP","DB AG","462"],
+["Herzberg (Harz)",5,51.653,10.337,"NI","DB AG","357"],
+["Hessisch Oldendorf",1,52.165,9.264,"NI","DB AG","372"],
+["Hettstedt",1,51.648,11.506,"ST","DB AG","335","Teilweise"],
+["Hilchenbach",1,51.003,8.106,"NW","DB AG","443"],
+["Hiltersdorf",1,49.525,11.975,"BY","DB AG","870"],
+["Hinterweidenthal Ort",1,49.149,7.748,"RP","DB AG","675.1"],
+["Hitzacker",1,53.145,11.049,"NI","DB AG","112","Hp Bk"],
+["Höchstädt (Donau)",1,48.602,10.564,"BY","DB AG","993"],
+["Hohenebra",1,51.404,10.768,"TH","DB AG","601"],
+["Hohenebra Ort",5,51.406,10.772,"TH","DB AG","601","Bk"],
+["Holzhausen-Heddinghausen",1,52.143,8.636,"NW","DB AG","386"],
+["Horn-Bad Meinberg",5,51.875,8.952,"NW","DB AG","405"],
+["Hörpolding",1,47.994,12.592,"BY","DB AG","947"],
+["Hungen",5,50.468,8.897,"HE","DB AG","631"],
+["Huntlosen",1,53.055,8.325,"NI","DB AG","392"],
+["Illertissen",1,48.224,10.097,"BY","DB AG","975"],
+["Ingelbach",1,50.644,7.648,"RP","DB AG","461"],
+["Joachimsthal",1,52.988,13.762,"BB","DB AG","209.63"],
+["Kandel",5,49.083,8.196,"RP","DB AG","676"],
+["Karlsruhe Hafen",1,49.025,8.323,"BW","DB AG","---","ASig + ESig"],
+["Karow (Meckl)",1,53.543,12.265,"MV","DB AG","172"],
+["Kassel Rbf",5,51.340,9.508,"HE","DB AG","430"],
+["Kassel-Bettenhausen",1,51.311,9.541,"HE","DB AG","---"],
+["Kellmünz",1,48.073,10.139,"BY","DB AG","975"],
+["Klanxbüll",5,54.924,8.658,"SH","DB AG","130"],
+["Koblenz-Lützel",1,50.355,7.607,"RP","DB AG","470","Teilweise"],
+["Köln Eifeltor",1,50.893,6.979,"NW","DB AG","---","Nur teilw. FSig"],
+["Köln-Kalk Nord",1,50.930,7.019,"NW","DB AG","---"],
+["Königsborn",1,51.878,11.621,"ST","DB AG","254","Auch DR-LichtVSig"],
+["Kothmaißling",1,49.152,11.828,"BY","DB AG","875"],
+["Kruft",1,50.413,7.332,"RP","DB AG","478"],
+["Kühlungsborn West",1,54.148,11.742,"MV","MBB","186","nur ESig"],
+["Kühnhausen",5,50.975,10.889,"TH","DB AG","601"],
+["Lage (Lippe)",7,51.990,8.790,"NW","DB AG","404"],
+["Landsberg (Lech)",1,48.048,10.870,"BY","DB AG","986"],
+["Langenhahn",1,50.624,7.807,"RP","DB AG","461"],
+["Langenhorn (Schlesw)",5,54.803,9.020,"SH","DB AG","130","Hp Bk"],
+["Laucha (Unstrut)",1,51.227,11.726,"ST","DB AG","585"],
+["Laußig (b Düben)",1,51.607,12.553,"SN","DB AG","218"],
+["Lauterbach (Hess) Nord",1,50.638,9.400,"HE","DB AG","635"],
+["Leese-Stolzenau",1,52.480,9.102,"NI","DB AG","124"],
+["Lehnshallig",5,54.758,9.037,"SH","DB AG","130"],
+["Leipzig-Schönefeld",1,51.375,12.422,"SN","DB AG","---"],
+["Leopoldstal",5,51.880,8.948,"NW","DB AG","405"],
+["Leschede",1,52.468,7.394,"NI","DB AG","395"],
+["Lich (Oberhess)",7,50.523,8.824,"HE","DB AG","631"],
+["Lindenberg",1,53.366,13.516,"BB","Pollo","---","750mm Spurweite"],
+["Lindholm",5,54.862,9.117,"SH","DB AG","130","Bbf"],
+["Lingen (Ems)",1,52.524,7.327,"NI","DB AG","395"],
+["Lobenstein (Thür)",1,50.454,11.640,"TH","DB AG","557"],
+["Lorsch",1,49.651,8.568,"HE","DB AG","653"],
+["Lübbecke (Westf)",1,52.306,8.629,"NW","DB AG","386"],
+["Lüdinghausen",1,51.768,7.445,"NW","DB AG","412"],
+["Luitpoldhütte",1,49.543,11.973,"BY","DB AG","870"],
+["Maberzell",1,50.530,9.663,"HE","DB AG","635","Parkeisenbahn Fulda"],
+["Mannheim Rbf Dora",1,49.476,8.476,"BW","DB AG","665","Am östlichen Ende"],
+["Marienhafe",1,53.498,7.347,"NI","DB AG","395"],
+["Markdorf (Baden)",1,47.719,9.384,"BW","DB AG","731"],
+["Mayen Ost",1,50.325,7.227,"RP","DB AG","478"],
+["Medewitz (Mark)",1,52.124,12.507,"BB","DB AG","203"],
+["Menden Horlecke",1,51.448,7.786,"NW","DB AG","437","zeitweise durchgeschaltet"],
+["Mendig",1,50.369,7.277,"RP","DB AG","478"],
+["Mengen",1,48.048,9.336,"BW","DB AG","755"],
+["Meppen",1,52.693,7.293,"NI","DB AG","395"],
+["Meuselwitz",1,51.050,12.299,"TH","DB AG","553"],
+["Miesbach",1,47.788,11.832,"BY","DB AG","955"],
+["Millingen",5,51.799,6.423,"NW","DB AG","498"],
+["Miltitz-Roitzschen",1,51.244,13.069,"SN","DB AG","506"],
+["Mönchengladbach-Rheindahlen",1,51.145,6.389,"NW","DB AG","487"],
+["Moritzburg",1,51.160,13.682,"SN","SDG","509"],
+["Mössingen",1,48.407,9.054,"BW","DB AG","766"],
+["Möttingen",1,48.804,10.560,"BY","DB AG","995"],
+["Mügeln (b Oschatz)",1,51.243,12.843,"SN","DBG","12502","Döllnitzbahn"],
+["Mülheim (Ruhr)-Speldorf",1,51.440,6.889,"NW","DB AG","---","Rheinische Bahn"],
+["Münchberg",1,50.194,11.789,"BY","DB AG","850"],
+["München Ost Rbf",1,48.128,11.618,"BY","DB AG","950"],
+["Munster (Örtze)",1,52.977,9.989,"NI","DB AG","116"],
+["Nabburg",1,49.451,12.184,"BY","DB AG","855"],
+["Neuburg (Donau)",1,48.732,11.191,"BY","DB AG","993"],
+["Neuss Gbf",1,51.205,6.698,"NW","DB AG","495"],
+["Neustrelitz Süd",1,53.350,13.074,"MV","DB AG","186","Ohne Verkehr"],
+["Niebüll",5,54.787,8.833,"SH","DB AG","130"],
+["Nieder Ohmen",1,50.659,9.081,"HE","DB AG","635"],
+["Niederlindhart",1,48.756,12.416,"BY","DB AG","932","Nur ESig"],
+["Niederzeuzheim",1,50.454,8.016,"HE","DB AG","461","Nur ESig"],
+["Nordhausen Nord",1,51.505,10.785,"TH","HSB","326"],
+["Nossen",1,51.056,13.296,"SN","DB AG","506"],
+["Ober Widdersheim",5,50.374,8.968,"HE","DB AG","631"],
+["Oberhausen West",1,51.488,6.840,"NW","DB AG","---"],
+["Oberrohn",1,50.822,9.985,"TH","DB AG","575","Ostseite"],
+["Oppurg",1,50.748,11.747,"TH","DB AG","555"],
+["Oschatz",1,51.300,13.106,"SN","DB AG","12502","Nur Schmalspur"],
+["Parkstein-Hütten",1,49.732,12.066,"BY","DB AG","867"],
+["Petershagen-Lahde",1,52.357,8.962,"NW","DB AG","124"],
+["Pfahlgraben",7,50.467,8.835,"HE","DB AG","631"],
+["Pfarrkirchen",1,48.434,12.940,"BY","DB AG","946"],
+["Pößneck ob Bf",1,50.699,11.599,"TH","DB AG","555"],
+["Pressath",1,49.764,12.066,"BY","DB AG","867"],
+["Putbus",1,54.357,13.472,"MV","PRESS","198"],
+["Quakenbrück",1,52.678,7.956,"NI","DB AG","392"],
+["Rahden (Kr. Lübbecke)",1,52.432,8.609,"NW","DB AG","386"],
+["Ratingen-Ost",5,51.296,6.899,"NW","DB AG","450.6"],
+["Ratingen-West",5,51.296,6.849,"NW","DB AG","---"],
+["Rätzlingen",1,52.310,11.199,"ST","DB AG","308"],
+["Rauschwald",1,50.521,9.239,"HE","DB AG","633","Abzw"],
+["Regensburg Ost",1,49.015,12.119,"BY","DB AG","880"],
+["Regis-Breitingen",5,51.088,12.429,"SN","DB AG","530"],
+["Rehmsdorf",1,51.097,12.184,"ST","DB AG","553","Bk, durchgeschaltet"],
+["Reuth (b Erbendorf)",5,49.864,12.143,"BY","DB AG","855"],
+["Rheinberg",5,51.547,6.600,"NW","DB AG","498"],
+["Rheinkamp",5,51.547,6.638,"NW","DB AG","498","Gbf"],
+["Rheinsberg (Mark)",1,53.098,12.892,"BB","DB AG","209.54"],
+["Riederau",5,47.951,11.077,"BY","DB AG","985","Dkst"],
+["Riesa Rbf",1,51.303,13.290,"SN","DB AG","500","Teilweise"],
+["Rinteln",1,52.187,9.083,"NI","DB AG","372"],
+["Rödental",5,50.300,11.060,"BY","DB AG","830"],
+["Rohrenfeld",1,48.705,11.036,"BY","DB AG","993"],
+["Rositz",1,51.040,12.292,"TH","DB AG","553","ausgekreuzt"],
+["Roßberg",5,47.881,9.736,"BW","DB AG","753"],
+["Roßwein",1,51.073,13.185,"SN","DB AG","506","Signalbrücke"],
+["Rottleberode Süd",1,51.544,11.029,"ST","DB AG","592"],
+["Rudersberg-Oberndorf",1,48.895,9.536,"BW","DBK","12789"],
+["Salem",1,47.762,9.304,"BW","DB AG","731"],
+["Salzgitter-Ringelheim",1,52.058,10.388,"NI","DB AG","352"],
+["Sandkrug",1,53.080,8.212,"NI","DB AG","392"],
+["Sangerhausen",5,51.469,11.300,"ST","DB AG","590","Teilweise"],
+["Satteldorf",5,49.178,10.083,"BW","DB AG","782"],
+["Satzvey",5,50.566,6.614,"NW","DB AG","474"],
+["Scharzfeld",7,51.631,10.348,"NI","DB AG","357"],
+["Scherfede",1,51.507,9.044,"NW","DB AG","435"],
+["Schladen (Harz)",5,52.019,10.575,"NI","DB AG","353"],
+["Schlettau (Erzgeb)",1,50.529,12.909,"SN","DB AG","536","2009 aufgestellt"],
+["Schmalkalden",1,50.718,10.451,"TH","DB AG","573"],
+["Schneverdingen",1,53.116,9.797,"NI","DB AG","123"],
+["Schönberger Strand",1,54.395,10.196,"SH","VVM","12131","Ausgekreuzt"],
+["Schondorf (Bay.)",1,47.994,11.105,"BY","DB AG","985"],
+["Schongau",1,47.815,10.895,"BY","DB AG","962","Gruppenasig"],
+["Schönheide",1,50.524,12.578,"SN","---","---","ehem. Bf. Schönheide Mitte"],
+["Schönheide Süd",1,50.510,12.590,"SN","---","---"],
+["Schortens-Heidmühle",1,53.537,7.957,"NI","DB AG","393"],
+["Schwarzenberg (Erzgeb)",1,50.544,12.780,"SN","DB AG","535","Nur Museum"],
+["Schwindegg",7,48.156,12.253,"BY","DB AG","940"],
+["Seelze Rbf",1,52.397,9.598,"NI","DB AG","370"],
+["Senftenberg W2",1,51.523,14.006,"BB","DB AG","208"],
+["Siershahn",1,50.534,7.738,"RP","DB AG","629"],
+["Soltau (Han)",1,52.981,9.835,"NI","DB AG","123"],
+["Stadtallendorf",5,50.834,9.002,"HE","DB AG","620"],
+["Stammbach",1,50.087,11.697,"BY","DB AG","850"],
+["Stedesand",5,54.841,9.096,"SH","DB AG","130","Bbf"],
+["Sternebeck",1,52.654,13.879,"BB","DB AG","204.7"],
+["Stickhausen-Velde (Ostfriesl.)",1,53.177,7.721,"NI","DB AG","390"],
+["Storzingen",1,48.042,9.174,"BW","DB AG","766"],
+["Stralsund Querkanalbrücke",1,54.315,13.089,"MV","DB AG","---","Dkst, Deckungssignale"],
+["Straußfurt",5,51.190,10.997,"TH","DB AG","601"],
+["Sulingen (Han.)",1,52.675,8.797,"NI","DB AG","386"],
+["Sulzbach (Inn)",1,48.264,12.814,"BY","DB AG","946"],
+["Sulzbach-Rosenberg Hütte",1,49.495,11.773,"BY","DB AG","870"],
+["Thale Hbf",1,51.753,11.029,"ST","DB AG","315"],
+["Themar",1,50.497,10.628,"TH","DB AG","569"],
+["Trabitz",1,49.812,12.090,"BY","DB AG","867"],
+["Triptis",1,50.749,11.788,"TH","DB AG","555"],
+["Tröglitz",1,51.073,12.192,"ST","DB AG","553","teilw. ausgekreuzt"],
+["Trostberg",1,48.024,12.546,"BY","DB AG","947"],
+["Überlingen Therme",1,47.770,9.157,"BW","DB AG","731"],
+["Unterhausen (Bay.)",1,48.695,11.059,"BY","DB AG","993"],
+["Uttershausen (Abzw)",1,51.150,9.448,"HE","DB","620","Anst"],
+["Utting",1,47.982,11.081,"BY","DB AG","985"],
+["Veltheim (b. Rinteln)",1,52.183,9.132,"NW","DB AG","372"],
+["Villingen (Schwarzw)",5,48.062,8.462,"BW","DB AG","720"],
+["Visselhövede",1,52.999,9.609,"NI","DB AG","116"],
+["Vitzenburg",1,51.338,11.695,"ST","DB AG","585","ausgekreuzt"],
+["Vlotho",1,52.161,8.857,"NW","DB AG","372"],
+["Vöhringen",1,48.278,10.080,"BY","DB AG","975"],
+["Wahrenholz",1,52.626,10.580,"NI","DB AG","115"],
+["Waldkappel",1,51.166,9.869,"HE","VES","ex522","Museumsbahn Waldkappel"],
+["Wallenrod",1,50.605,9.383,"HE","DB AG","635"],
+["Walleshausen",1,48.072,11.011,"BY","DB AG","985"],
+["Walsrode",1,52.861,9.593,"NI","DB AG","123"],
+["Wanne Osthafen",1,51.532,7.170,"NW","WHE","---"],
+["Wanne-Eickel",1,51.533,7.153,"NW","DB AG","416","FSig nur im Güterbhf."],
+["Wasungen",1,50.655,10.360,"TH","DB AG","575","Hp Bk"],
+["Wasserthaleben",5,51.364,10.818,"TH","DB AG","601"],
+["Wechselburg",1,51.001,12.774,"SN","DB AG","529ex"],
+["Wegberg",1,51.141,6.280,"NW","DB AG","487"],
+["Weichering",1,48.738,11.166,"BY","DB AG","993"],
+["Weidenbach",7,48.176,12.177,"BY","DB AG","940"],
+["Weißenberg (Abzw)",1,51.207,6.718,"NW","DB AG","495","Abzw"],
+["Wernshausen",1,50.671,10.405,"TH","DB AG","575"],
+["Wiesenburg (Mark)",1,52.066,12.441,"BB","DB AG","203"],
+["Wilsenroth",1,50.637,7.982,"HE","DB AG","461"],
+["Winden (Pfalz)",5,49.024,8.188,"RP","DB AG","676"],
+["Windheim (Weser)",1,52.351,8.924,"NW","DB AG","124"],
+["Windischeschenbach",5,49.794,12.134,"BY","DB AG","855"],
+["Wittenburg (Meckl)",1,53.504,11.089,"MV","DB AG","104ex"],
+["Wittingen",1,52.723,10.731,"NI","DB AG","115"],
+["Wolfenbüttel",5,52.163,10.536,"NI","DB AG","353"],
+["Wörth (Isar)",1,48.695,12.575,"BY","DB AG","931"],
+["Wulfen (Westf.)",1,51.669,7.046,"NW","DB AG","424","Hp"],
+["Wulften",5,51.632,10.350,"NI","DB AG","357"],
+["Wünschendorf (Elster)",5,50.800,12.091,"TH","DB AG","541"],
+["Wustermark",1,52.543,12.952,"BB","DB AG","---","Rbf"],
+["Zauschwitz",1,51.147,12.533,"SN","DB AG","550","Bk"],
+["Zeitz Gbf",1,51.053,12.138,"ST","DB AG","550"],
+["Zeitz Pbf",1,51.058,12.135,"ST","DB AG","550"],
+["Ziegenrück",3,50.521,11.634,"TH","DB AG","556"],
+["Zittau Süd",1,50.891,14.808,"SN","SOEG","238","ohne Asig, Esig 2015 aufgestellt"],
+["Zwickau (Sachs) Gbf",1,50.705,12.498,"SN","DB AG","510"],
+["Zwickau (Sachs) Hbf",1,50.717,12.496,"SN","DB AG","510"],
+];
+
+var theMap = L.map("map", {attributionControl:false}).setView([51.2,10.4],6);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(theMap);
+
+var activeS = new Set();
+var activeA = new Set();
+var activeH = new Set();
+
+function mkSignalIcon(status, ann) {
+  var sc = SC[status];
+  var ac = ann ? AC[ann] : null;
+  var badge = ac ? "<div style=\"position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:" + ac.col + ";border:1.5px solid #fff;border-radius:50%;\"></div>" : "";
+  return L.divIcon({
+    className:"",
+    html:"<div style=\"position:relative;width:14px;height:14px\"><div style=\"position:absolute;top:1px;left:1px;width:12px;height:12px;background:" + sc.col + ";border:1.5px solid " + sc.dark + ";border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.4);\"></div>" + badge + "</div>",
+    iconSize:[14,14], iconAnchor:[7,7], popupAnchor:[0,-9]
+  });
+}
+
+function mkHighlightIcon(kat) {
+  var hc = HC[kat];
+  return L.divIcon({
+    className:"",
+    html:"<div style=\"width:12px;height:12px;background:" + hc.col + ";border:1.5px solid " + hc.dark + ";transform:rotate(45deg);box-shadow:0 1px 3px rgba(0,0,0,.4);\"></div>",
+    iconSize:[12,12], iconAnchor:[6,6], popupAnchor:[0,-8]
+  });
+}
+
+var allMarkers = [];
+var cntS = {1:0,3:0,5:0,7:0};
+var cntA = {p:0,i:0,v:0};
+
+D.forEach(function(row) {
+  var name=row[0],status=row[1],lat=row[2],lng=row[3],land=row[4],bahn=row[5],kbs=row[6],rem=row[7]||"";
+  var ann = ANN[name] || null;
+  var annKey = ann || "0";
+  var sc = SC[status];
+  var ac = ann ? AC[ann] : null;
+  var mk = L.marker([lat,lng], {icon:mkSignalIcon(status,ann)});
+  mk.bindPopup(
+    "<div class=\"pn\">" + name + "</div>" +
+    "<div class=\"ps\">" + land + " &middot; " + bahn + " &middot; KBS " + kbs + "</div>" +
+    "<span class=\"pb\" style=\"background:" + sc.col + "\">" + sc.sym + " " + sc.lbl + "</span>" +
+    (ac ? "<span class=\"pa\" style=\"background:" + ac.col + "\">" + ac.sym + " " + ac.lbl + "</span>" : "") +
+    (rem ? "<div class=\"pr\">&#8505; " + rem + "</div>" : "")
+  );
+  allMarkers.push({mk:mk, status:status, ann:ann, annKey:annKey});
+  cntS[status]++;
+  if (ann) cntA[ann]++;
+});
+
+Object.keys(cntS).forEach(function(s){ document.getElementById("ns"+s).textContent = cntS[s]; });
+Object.keys(cntA).forEach(function(a){ document.getElementById("na"+a).textContent = cntA[a]; });
+
+var allHighlights = [];
+var cntH = {b:0,m:0,f:0};
+
+H.forEach(function(row) {
+  var name=row[0],kat=row[1],lat=row[2],lng=row[3],desc=row[4],url=row[5]||"";
+  var hc = HC[kat];
+  var mk = L.marker([lat,lng], {icon:mkHighlightIcon(kat)});
+  mk.bindPopup(
+    "<div class=\"pn\">" + name + "</div>" +
+    "<span class=\"pb\" style=\"background:" + hc.col + "\">&#9670; " + hc.lbl + "</span>" +
+    "<div class=\"pr\" style=\"margin-top:5px\">" + desc + "</div>" +
+    (url ? "<div style=\"margin-top:5px\"><a href=\"" + url + "\" target=\"_blank\" style=\"font-size:11px;color:#2980b9\">" + url.replace("https://","") + "</a></div>" : "")
+  );
+  allHighlights.push({mk:mk, kat:kat});
+  cntH[kat]++;
+});
+
+Object.keys(cntH).forEach(function(k){ document.getElementById("nh"+k).textContent = cntH[k]; });
+
+function applyFilter() {
+  var shown = 0;
+  allMarkers.forEach(function(o) {
+    var visible = false;
+    // Annotierte Stationen: sichtbar wenn ihre Annotation aktiv ist
+    if (o.ann === "p" && activeA.has("p")) visible = true;
+    else if (o.ann === "p" && activeA.has("i")) visible = true;
+    else if (o.ann === "i" && activeA.has("i")) visible = true;
+    else if (o.ann === "v" && activeA.has("v")) visible = true;
+    // Alle Stationen: sichtbar wenn ihr Status aktiv ist
+    if (activeS.has(o.status)) visible = true;
+    if (visible) { if (!theMap.hasLayer(o.mk)) o.mk.addTo(theMap); shown++; }
+    else         { if ( theMap.hasLayer(o.mk)) theMap.removeLayer(o.mk); }
+  });
+  document.getElementById("sb-txt").textContent = shown + " von " + D.length + " Betriebsstellen sichtbar";
+}
+
+function tog(type, key) {
+  var chipId = type==="s" ? "cs"+key : type==="a" ? "ca"+key : "ch"+key;
+  var set     = type==="s" ? activeS  : type==="a" ? activeA  : activeH;
+  var chip = document.getElementById(chipId);
+  if (set.has(key)) { set.delete(key); chip.classList.add("off"); }
+  else              { set.add(key);    chip.classList.remove("off"); }
+  allHighlights.forEach(function(o) {
+    if (activeH.has(o.kat)) { if (!theMap.hasLayer(o.mk)) o.mk.addTo(theMap); }
+    else                    { if ( theMap.hasLayer(o.mk)) theMap.removeLayer(o.mk); }
+  });
+  applyFilter();
+}
+
+applyFilter();
+
+// Service Worker registrieren (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(reg) { console.log('SW registriert:', reg.scope); })
+      .catch(function(err) { console.log('SW Fehler:', err); });
+  });
+}
+</script>
+</body>
+</html>

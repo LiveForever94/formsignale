@@ -1085,6 +1085,70 @@ applyFilter();
 
 var VISITED = new Set(JSON.parse(localStorage.getItem("fs-visited") || "[]"));
 
+// ── SUPABASE SYNC ──────────────────────────────────────────────────────────
+var SB_URL = "https://vcoutgfdphaisxbhswvo.supabase.co";
+var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjb3V0Z2ZkcGhhaXN4Ymhzd3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYwMjgsImV4cCI6MjA5ODE2MjAyOH0.fHHYFEfJFtahguVM0XBjn8dcM6-WX89Uaz_VtyYdpfM";
+var SB_TABLE = "formsignale";
+
+// Eindeutige Geräte-ID (wird einmalig generiert und gespeichert)
+var USER_ID = localStorage.getItem("fs-user-id");
+if (!USER_ID) {
+  USER_ID = "user_" + Math.random().toString(36).slice(2,10);
+  localStorage.setItem("fs-user-id", USER_ID);
+}
+
+function sbHeaders() {
+  return {
+    "apikey": SB_KEY,
+    "Authorization": "Bearer " + SB_KEY,
+    "Content-Type": "application/json",
+    "Prefer": "return=minimal"
+  };
+}
+
+// Alle besuchten Orte vom Server laden
+function loadFromSupabase() {
+  fetch(SB_URL + "/rest/v1/" + SB_TABLE + "?user_id=eq." + encodeURIComponent(USER_ID) + "&select=location_name", {
+    headers: sbHeaders()
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (!Array.isArray(rows)) return;
+    rows.forEach(function(row){ VISITED.add(row.location_name); });
+    // Auch lokal speichern als Fallback
+    localStorage.setItem("fs-visited", JSON.stringify([...VISITED]));
+    // Karte und Checkliste aktualisieren
+    allMarkers.forEach(function(o){
+      var baseAnn = ANN[o.name] || null;
+      var effAnn = (VISITED.has(o.name) && baseAnn !== "p" && baseAnn !== "i") ? "v" : baseAnn;
+      o.mk.setIcon(mkSignalIcon(o.status, effAnn));
+    });
+    allHighlights.forEach(function(o){
+      o.mk.setIcon(mkHighlightIcon(o.kat, VISITED.has(o.name)));
+    });
+    updateProgress();
+    applyFilter();
+  })
+  .catch(function(){ console.log("Offline – nutze lokalen Cache"); });
+}
+
+// Eintrag in Supabase speichern
+function sbAdd(name) {
+  return fetch(SB_URL + "/rest/v1/" + SB_TABLE, {
+    method: "POST",
+    headers: sbHeaders(),
+    body: JSON.stringify({user_id: USER_ID, location_name: name})
+  });
+}
+
+// Eintrag aus Supabase löschen
+function sbRemove(name) {
+  return fetch(SB_URL + "/rest/v1/" + SB_TABLE + "?user_id=eq." + encodeURIComponent(USER_ID) + "&location_name=eq." + encodeURIComponent(name), {
+    method: "DELETE",
+    headers: sbHeaders()
+  });
+}
+
 var LAND_NAMES = {
   "BW":"Baden-Württemberg","BY":"Bayern","BE":"Berlin","BB":"Brandenburg",
   "HB":"Bremen","HH":"Hamburg","HE":"Hessen","MV":"Mecklenburg-Vorpommern",
@@ -1112,17 +1176,20 @@ function guessLand(lat, lng) {
   return "DE";
 }
 
-function saveVisited() {
+function saveVisited(name, isAdd) {
   localStorage.setItem("fs-visited", JSON.stringify([...VISITED]));
+  // Supabase sync
+  if (isAdd) sbAdd(name).catch(function(){ console.log("Sync fehlgeschlagen, lokal gespeichert"); });
+  else        sbRemove(name).catch(function(){ console.log("Sync fehlgeschlagen, lokal gespeichert"); });
 }
 
 function toggleVisited(name) {
   if (VISITED.has(name)) VISITED.delete(name);
   else VISITED.add(name);
-  saveVisited();
+  var nowVisited = VISITED.has(name);
+  saveVisited(name, nowVisited);
   updateProgress();
   renderList();
-  var nowVisited = VISITED.has(name);
   // Signal-Marker aktualisieren
   allMarkers.forEach(function(o) {
     if (o.name === name) {
@@ -1255,6 +1322,7 @@ function showTab(tab) {
 }
 
 populateLandDropdown();
+loadFromSupabase();
 
 </script>
 </body>

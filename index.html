@@ -32,6 +32,46 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
 .pb{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;}
 .pa{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;margin-left:3px;}
 .pr{font-size:10px;color:#666;font-style:italic;margin-top:3px;}
+
+/* ── Tab Navigation ── */
+#tabs { display:flex; background:#0d1b2a; flex-shrink:0; }
+.tab { flex:1; padding:10px 0; text-align:center; font-size:12px; font-weight:700;
+  color:rgba(255,255,255,.4); cursor:pointer; border-bottom:3px solid transparent;
+  transition:all .2s; user-select:none; }
+.tab.active { color:#fff; border-bottom-color:#3498db; }
+
+/* ── Screens ── */
+#screen-map { display:flex; flex-direction:column; flex:1; min-height:0; }
+#screen-list { display:none; flex-direction:column; flex:1; min-height:0; background:#f5f6fa; }
+
+/* ── Checkliste Header ── */
+#list-header { background:#fff; padding:10px 12px; border-bottom:1px solid #dee2e6; flex-shrink:0; }
+#list-progress { font-size:11px; color:#666; margin-bottom:6px; }
+#list-progress-bar { height:4px; background:#eee; border-radius:2px; overflow:hidden; }
+#list-progress-fill { height:100%; background:#16a085; border-radius:2px; transition:width .3s; }
+#list-search { width:100%; padding:7px 10px; border:1px solid #dee2e6; border-radius:8px;
+  font-size:13px; margin-top:6px; outline:none; }
+#list-filter { display:flex; gap:4px; margin-top:6px; flex-wrap:wrap; }
+.lf { padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600;
+  cursor:pointer; border:1.5px solid #dee2e6; background:#fff; color:#666; }
+.lf.active { background:#0d1b2a; color:#fff; border-color:#0d1b2a; }
+
+/* ── Checkliste Body ── */
+#list-body { flex:1; overflow-y:auto; padding:8px 0; }
+.list-group { margin-bottom:4px; }
+.list-group-header { padding:6px 12px; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.6px; color:#aaa; background:#f5f6fa;
+  position:sticky; top:0; z-index:1; }
+.list-item { display:flex; align-items:center; gap:10px; padding:9px 12px;
+  background:#fff; border-bottom:1px solid #f0f0f0; cursor:pointer; active:background:#f5f6fa; }
+.list-item.done .li-name { text-decoration:line-through; color:#bbb; }
+.list-item.done .li-sub { color:#ccc; }
+.li-check { width:22px; height:22px; border-radius:6px; border:2px solid #dee2e6;
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-size:13px; transition:all .15s; }
+.list-item.done .li-check { background:#16a085; border-color:#16a085; color:#fff; }
+.li-name { font-size:13px; font-weight:600; color:#0d1b2a; }
+.li-sub { font-size:10px; color:#999; margin-top:1px; }
 </style>
 </head>
 <body>
@@ -43,6 +83,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
     <p>Offline · Quelle: FormsignalBahnhofsVerzeichnis (hobby-eisenbahnfotografie.de)</p>
   </div>
 </div>
+<div id="tabs">
+  <div class="tab active" onclick="showTab('map')">&#x1F5FA; Karte</div>
+  <div class="tab" onclick="showTab('list')">&#x2705; Checkliste</div>
+</div>
+<div id="screen-map">
 <div id="toolbar">
   <div class="fr">
     <span class="rl">DB-Status:</span>
@@ -66,6 +111,23 @@ body{font-family:'Segoe UI',Arial,sans-serif;}
 </div>
 <div id="sb"><span id="sb-txt">Lade...</span></div>
 <div id="map"></div>
+</div><!-- /screen-map -->
+
+<div id="screen-list">
+  <div id="list-header">
+    <div id="list-progress"><span id="lp-done">0</span> von <span id="lp-total">0</span> besucht</div>
+    <div id="list-progress-bar"><div id="list-progress-fill" style="width:0%"></div></div>
+    <input id="list-search" type="search" placeholder="&#x1F50D; Suchen..." oninput="renderList()">
+    <div id="list-filter">
+      <div class="lf active" onclick="setLF('all',this)">Alle</div>
+      <div class="lf" onclick="setLF('open',this)">Noch offen</div>
+      <div class="lf" onclick="setLF('done',this)">Besucht</div>
+      <div class="lf" onclick="setLF('signal',this)">Nur Formsignale</div>
+      <div class="lf" onclick="setLF('spot',this)">Nur Fotospots</div>
+    </div>
+  </div>
+  <div id="list-body"></div>
+</div>
 </div>
 <script>
 "use strict";
@@ -825,7 +887,7 @@ D.forEach(function(row) {
     (ac ? "<span class=\"pa\" style=\"background:" + ac.col + "\">" + ac.sym + " " + ac.lbl + "</span>" : "") +
     (rem ? "<div class=\"pr\">&#8505; " + rem + "</div>" : "")
   );
-  allMarkers.push({mk:mk, status:status, ann:ann, annKey:annKey});
+  allMarkers.push({mk:mk, status:status, ann:ann, annKey:annKey, name:name});
   cntS[status]++;
   if (ann) cntA[ann]++;
 });
@@ -880,9 +942,254 @@ function tog(type, key) {
     else                    { if ( theMap.hasLayer(o.mk)) theMap.removeLayer(o.mk); }
   });
   applyFilter();
+
+
+// ── CHECKLISTE ─────────────────────────────────────────────────────────────
+var VISITED = new Set(JSON.parse(localStorage.getItem('fs-visited') || '[]'));
+var listFilter = 'all';
+
+function saveVisited() {
+  localStorage.setItem('fs-visited', JSON.stringify([...VISITED]));
+}
+
+function toggleVisited(name) {
+  if (VISITED.has(name)) VISITED.delete(name);
+  else VISITED.add(name);
+  saveVisited();
+  updateProgress();
+  renderList();
+  // Marker auf der Karte aktualisieren
+  allMarkers.forEach(function(o) {
+    if (o.name === name) {
+      o.mk.setIcon(mkSignalIcon(o.status, VISITED.has(name) ? 'v' : (ANN[name]||null)));
+    }
+  });
+}
+
+function updateProgress() {
+  var total = D.length + H.length;
+  var done = 0;
+  D.forEach(function(r){ if (VISITED.has(r[0])) done++; });
+  H.forEach(function(r){ if (VISITED.has(r[0])) done++; });
+  document.getElementById('lp-done').textContent = done;
+  document.getElementById('lp-total').textContent = total;
+  document.getElementById('list-progress-fill').style.width = Math.round(done/total*100) + '%';
+}
+
+function setLF(f, el) {
+  listFilter = f;
+  document.querySelectorAll('.lf').forEach(function(e){ e.classList.remove('active'); });
+  el.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  var q = document.getElementById('list-search').value.toLowerCase();
+  var body = document.getElementById('list-body');
+  var html = '';
+
+  // Bundesländer-Gruppen für Formsignale
+  var byLand = {};
+  if (listFilter !== 'spot') {
+    D.forEach(function(r) {
+      var name=r[0], land=r[4];
+      var done = VISITED.has(name);
+      if (listFilter === 'open' && done) return;
+      if (listFilter === 'done' && !done) return;
+      if (q && name.toLowerCase().indexOf(q) < 0) return;
+      if (!byLand[land]) byLand[land] = [];
+      byLand[land].push({name:name, sub:r[5]+' · KBS '+r[6], done:done});
+    });
+    Object.keys(byLand).sort().forEach(function(land) {
+      html += '<div class="list-group">';
+      html += '<div class="list-group-header">&#9679; Formsignale – ' + land + '</div>';
+      byLand[land].forEach(function(item) {
+        html += listItemHTML(item.name, item.sub, item.done);
+      });
+      html += '</div>';
+    });
+  }
+
+  // Highlight-Gruppen
+  if (listFilter !== 'signal') {
+    var byKat = {};
+    H.forEach(function(r) {
+      var name=r[0], kat=r[1];
+      var done = VISITED.has(name);
+      if (listFilter === 'open' && done) return;
+      if (listFilter === 'done' && !done) return;
+      if (q && name.toLowerCase().indexOf(q) < 0) return;
+      var katName = HC[kat].lbl + 'en';
+      if (!byKat[katName]) byKat[katName] = [];
+      byKat[katName].push({name:name, sub:r[4]||'', done:done});
+    });
+    Object.keys(byKat).sort().forEach(function(kat) {
+      html += '<div class="list-group">';
+      html += '<div class="list-group-header">&#9670; ' + kat + '</div>';
+      byKat[kat].forEach(function(item) {
+        html += listItemHTML(item.name, item.sub, item.done);
+      });
+      html += '</div>';
+    });
+  }
+
+  if (!html) html = '<div style="text-align:center;padding:40px;color:#aaa;font-size:13px">Keine Eintr&#228;ge gefunden</div>';
+  body.innerHTML = html;
+  // Event delegation
+  body.onclick = function(e) {
+    var item = e.target.closest('.list-item');
+    if (item) toggleVisited(item.getAttribute('data-name'));
+  };
+}
+
+function listItemHTML(name, sub, done) {
+  var enc = name.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+  return "<div class=\"list-item" + (done?" done":"") + "\" data-name=\"" + enc + "\">" +
+    "<div class=\"li-check\">" + (done?"&#10003;":"") + "</div>" +
+    "<div><div class=\"li-name\">" + name + "</div><div class=\"li-sub\">" + sub + "</div></div>" +
+    "</div>";
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  if (tab === 'map') {
+    document.getElementById('screen-map').style.display = 'flex';
+    document.getElementById('screen-list').style.display = 'none';
+    document.querySelector('.tab:nth-child(1)').classList.add('active');
+    theMap.invalidateSize();
+  } else {
+    document.getElementById('screen-map').style.display = 'none';
+    document.getElementById('screen-list').style.display = 'flex';
+    document.querySelector('.tab:nth-child(2)').classList.add('active');
+    updateProgress();
+    renderList();
+  }
+}
+
+
+
 }
 
 applyFilter();
+
+
+// ── CHECKLISTE ─────────────────────────────────────────────────────────────
+var VISITED = new Set(JSON.parse(localStorage.getItem('fs-visited') || '[]'));
+var listFilter = 'all';
+
+function saveVisited() {
+  localStorage.setItem('fs-visited', JSON.stringify([...VISITED]));
+}
+
+function toggleVisited(name) {
+  if (VISITED.has(name)) VISITED.delete(name);
+  else VISITED.add(name);
+  saveVisited();
+  updateProgress();
+  renderList();
+  // Marker auf der Karte aktualisieren
+  allMarkers.forEach(function(o) {
+    if (o.name === name) {
+      o.mk.setIcon(mkSignalIcon(o.status, VISITED.has(name) ? 'v' : (ANN[name]||null)));
+    }
+  });
+}
+
+function updateProgress() {
+  var total = D.length + H.length;
+  var done = 0;
+  D.forEach(function(r){ if (VISITED.has(r[0])) done++; });
+  H.forEach(function(r){ if (VISITED.has(r[0])) done++; });
+  document.getElementById('lp-done').textContent = done;
+  document.getElementById('lp-total').textContent = total;
+  document.getElementById('list-progress-fill').style.width = Math.round(done/total*100) + '%';
+}
+
+function setLF(f, el) {
+  listFilter = f;
+  document.querySelectorAll('.lf').forEach(function(e){ e.classList.remove('active'); });
+  el.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  var q = document.getElementById('list-search').value.toLowerCase();
+  var body = document.getElementById('list-body');
+  var html = '';
+
+  // Bundesländer-Gruppen für Formsignale
+  var byLand = {};
+  if (listFilter !== 'spot') {
+    D.forEach(function(r) {
+      var name=r[0], land=r[4];
+      var done = VISITED.has(name);
+      if (listFilter === 'open' && done) return;
+      if (listFilter === 'done' && !done) return;
+      if (q && name.toLowerCase().indexOf(q) < 0) return;
+      if (!byLand[land]) byLand[land] = [];
+      byLand[land].push({name:name, sub:r[5]+' · KBS '+r[6], done:done});
+    });
+    Object.keys(byLand).sort().forEach(function(land) {
+      html += '<div class="list-group">';
+      html += '<div class="list-group-header">&#9679; Formsignale – ' + land + '</div>';
+      byLand[land].forEach(function(item) {
+        html += listItemHTML(item.name, item.sub, item.done);
+      });
+      html += '</div>';
+    });
+  }
+
+  // Highlight-Gruppen
+  if (listFilter !== 'signal') {
+    var byKat = {};
+    H.forEach(function(r) {
+      var name=r[0], kat=r[1];
+      var done = VISITED.has(name);
+      if (listFilter === 'open' && done) return;
+      if (listFilter === 'done' && !done) return;
+      if (q && name.toLowerCase().indexOf(q) < 0) return;
+      var katName = HC[kat].lbl + 'en';
+      if (!byKat[katName]) byKat[katName] = [];
+      byKat[katName].push({name:name, sub:r[4]||'', done:done});
+    });
+    Object.keys(byKat).sort().forEach(function(kat) {
+      html += '<div class="list-group">';
+      html += '<div class="list-group-header">&#9670; ' + kat + '</div>';
+      byKat[kat].forEach(function(item) {
+        html += listItemHTML(item.name, item.sub, item.done);
+      });
+      html += '</div>';
+    });
+  }
+
+  if (!html) html = '<div style="text-align:center;padding:40px;color:#aaa;font-size:13px">Keine Eintr&#228;ge gefunden</div>';
+  body.innerHTML = html;
+  // Event delegation
+  body.onclick = function(e) {
+    var item = e.target.closest('.list-item');
+    if (item) toggleVisited(item.getAttribute('data-name'));
+  };
+}
+
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  if (tab === 'map') {
+    document.getElementById('screen-map').style.display = 'flex';
+    document.getElementById('screen-list').style.display = 'none';
+    document.querySelector('.tab:nth-child(1)').classList.add('active');
+    theMap.invalidateSize();
+  } else {
+    document.getElementById('screen-map').style.display = 'none';
+    document.getElementById('screen-list').style.display = 'flex';
+    document.querySelector('.tab:nth-child(2)').classList.add('active');
+    updateProgress();
+    renderList();
+  }
+}
+
+
+
 
 // Service Worker registrieren (PWA)
 if ('serviceWorker' in navigator) {

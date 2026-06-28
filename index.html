@@ -11,7 +11,6 @@
 <meta name="apple-mobile-web-app-title" content="Formsignale">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"Segoe UI",Arial,sans-serif;}
@@ -155,8 +154,41 @@ var SB_URL = "https://vcoutgfdphaisxbhswvo.supabase.co";
 var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjb3V0Z2ZkcGhhaXN4Ymhzd3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYwMjgsImV4cCI6MjA5ODE2MjAyOH0.fHHYFEfJFtahguVM0XBjn8dcM6-WX89Uaz_VtyYdpfM";
 var SB_TABLE = "formsignale";
 var USER_ID = "stefan";
-var sb = null;
-try { sb = supabase.createClient(SB_URL, SB_KEY); } catch(e) { console.warn("Supabase nicht verfügbar:", e); }
+
+function sbH() {
+  return {
+    "apikey": SB_KEY,
+    "Authorization": "Bearer " + SB_KEY,
+    "Content-Type": "application/json",
+    "Prefer": "return=minimal"
+  };
+}
+function sbAdd(name) {
+  fetch(SB_URL + "/rest/v1/" + SB_TABLE, {
+    method: "POST", headers: sbH(),
+    body: JSON.stringify({user_id: USER_ID, location_name: name})
+  }).then(function(r){
+    if (!r.ok) r.text().then(function(t){ console.error("sbAdd " + r.status + ":", t); });
+  }).catch(function(e){ console.error("sbAdd:", e); });
+}
+function sbRemove(name) {
+  fetch(SB_URL + "/rest/v1/" + SB_TABLE + "?user_id=eq." + encodeURIComponent(USER_ID) + "&location_name=eq." + encodeURIComponent(name), {
+    method: "DELETE", headers: sbH()
+  }).catch(function(e){ console.error("sbRemove:", e); });
+}
+function loadFromSupabase() {
+  fetch(SB_URL + "/rest/v1/" + SB_TABLE + "?user_id=eq." + encodeURIComponent(USER_ID) + "&select=location_name", {
+    headers: sbH()
+  }).then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (!Array.isArray(rows)) return;
+    rows.forEach(function(row){ VISITED.add(row.location_name); });
+    saveLocal();
+    refreshMarkerIcons();
+    updateProgress();
+    applyFilter();
+  }).catch(function(e){ console.error("load:", e); });
+}
 
 // ── BESUCHT-DATEN ─────────────────────────────────────────────────────────
 var VISITED = new Set(JSON.parse(localStorage.getItem("fs-visited") || "[]"));

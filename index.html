@@ -193,6 +193,10 @@ function loadFromSupabase() {
 // ── BESUCHT-DATEN ─────────────────────────────────────────────────────────
 var VISITED = new Set(JSON.parse(localStorage.getItem("fs-visited") || "[]"));
 
+function saveLocal() {
+  localStorage.setItem("fs-visited", JSON.stringify([...VISITED]));
+}
+
 function sbAdd(name) {
   if (!sb) return;
   sb.from(SB_TABLE).insert({user_id: USER_ID, location_name: name})

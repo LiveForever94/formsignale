@@ -116,7 +116,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;}
 </div>
 <script>
 "use strict";
-var SC={1:{col:"#27ae60",dark:"#1a6632",lbl:"Formsignale aktiv",sym:"&#9679;"},3:{col:"#e67e22",dark:"#9a4000",lbl:"Zustand unsicher",sym:"&#9681;"},5:{col:"#8e44ad",dark:"#5b2c6f",lbl:"&Auml;nderung geplant",sym:"&#9680;"},7:{col:"#e74c3c",dark:"#922b21",lbl:"&Auml;nderung laufend",sym:"&#9684;"}};
+var SC={1:{col:"#27ae60",dark:"#1a6632",lbl:"Formsignale aktiv",sym:"&#9679;"},3:{col:"#e67e22",dark:"#9a4000",lbl:"Zustand unsicher",sym:"&#9681;"},5:{col:"#8e44ad",dark:"#5b2c6f",lbl:"Änderung geplant",sym:"&#9680;"},7:{col:"#e74c3c",dark:"#922b21",lbl:"Änderung laufend",sym:"&#9684;"}};
 var AC={p:{col:"#2980b9",lbl:"Zeitnah besuchen",sym:"&#9658;"},i:{col:"#e6b800",lbl:"Interessant",sym:"&#9733;"},v:{col:"#16a085",lbl:"Bereits besucht",sym:"&#10003;"}};
 var HC={b:{col:"#c0392b",dark:"#922b21",lbl:"Bauwerk"},m:{col:"#7f8c00",dark:"#4a5300",lbl:"Museumsbahn"},f:{col:"#6c3483",dark:"#4a235a",lbl:"Fotospot"},t:{col:"#d4860b",dark:"#9a5c00",lbl:"Topmotiv"}};
 var LN={"BW":"Baden-Württemberg","BY":"Bayern","BE":"Berlin","BB":"Brandenburg","HB":"Bremen","HH":"Hamburg","HE":"Hessen","MV":"Mecklenburg-Vorpommern","NI":"Niedersachsen","NW":"Nordrhein-Westfalen","RP":"Rheinland-Pfalz","SL":"Saarland","SN":"Sachsen","ST":"Sachsen-Anhalt","SH":"Schleswig-Holstein","TH":"Thüringen"};
@@ -286,7 +286,6 @@ var H = [
   ["Dampfbahn Fränkische Schweiz","m",49.779,11.178,"Normalspur · Ebermannstadt–Behringersmühle · saisonaler Dampfbetrieb","https://www.dampfbahn-fraenkische-schweiz.de"],
   ["Hessencourier","m",51.317,9.493,"Normalspur · Kassel–Naumburg (Hessen) · historische Fahrzeuge, saisonale Fahrten","https://www.hessencourier.de"],
   ["Öchsle Bahn","m",48.073,9.882,"750 mm · Warthausen–Ochsenhausen · Mai–Okt an WE und Feiertagen","https://www.oechsle-bahn.de"],
-  // ── Fotospots NRW ─────────────────────────────────────────────────────
   ["Bochum – Förderturm","f",51.481,7.222,"Förderturm als Industriekulisse"],
   ["Essen Steele – Brücke","f",51.456,7.077,"Markante Brücke"],
   ["Herne – Dampfspeicherlok","f",51.537,7.216,"Dampfspeicherlok"],
@@ -327,7 +326,6 @@ var H = [
   ["Klusenstein – Tunnelausfahrt","f",51.404,7.475,"Tunnelausfahrt"],
   ["Klusenstein – Brücke","f",51.402,7.474,"Brücke"],
   ["Werdohl – Brücke","f",51.258,7.769,"Brücke"],
-  // ── Fotospots Thüringen & Sachsen ─────────────────────────────────────
   ["Breternitz – Stadtblick","f",50.696,11.417,"Stadtblick"],
   ["Sättelstädt – Kirchblick","f",51.010,10.378,"Kirchblick"],
   ["Haarhausen – Burgblick","f",50.910,11.000,"Burgblick"],
@@ -375,7 +373,6 @@ var H = [
   ["Radebeul Ost – Schmalspur","f",51.108,13.706,"Schmalspurbahn Lößnitzgrundbahn"],
   ["Colmnitz – Viadukt","f",50.958,13.467,"Viadukt"],
   ["Muldenhütten – Viadukt","f",50.930,13.163,"Viadukt"],
-  // ── Fotospots Sachsen – Kamenz/Radeberg Region ────────────────────────
   ["Hosena – Signale","f",51.435,14.052,"Formsignale"],
   ["Schwarzkollm – Bahnhof","f",51.357,14.108,"Bahnhof"],
   ["Straßengräbchen – Bahnhof","f",51.299,14.099,"Bahnhof (unbestätigt)"],
@@ -385,7 +382,6 @@ var H = [
   ["Radeberg – Wasserturm","f",51.120,13.912,"Wasserturm"],
   ["Wiednitz – Bahnhof","f",51.388,14.073,"Bahnhof (unbestätigt)"],
   ["Putzkau – Viadukt","f",51.108,14.237,"Viadukt"],
-  // ── Fotospots Sachsen – Oberlausitz ───────────────────────────────────
   ["Demitz-Thumitz – Viadukt","f",51.174,14.258,"Viadukt"],
   ["Obercunnersdorf – Viadukt","f",50.975,14.727,"Viadukt"],
   ["Ebersbach (Sachs) – Viadukt","f",51.004,14.595,"Viadukt"],
@@ -400,7 +396,6 @@ var H = [
   ["Hoyerswerda – Bahnhof","f",51.435,14.252,"Bahnhof (unbestätigt)"],
   ["Horka – Telegrafenmasten","f",51.338,14.913,"Telegrafenmasten (unbestätigt)"],
   ["Mückenhain – Telegrafenmasten","f",51.370,14.870,"Telegrafenmasten (unbestätigt)"],
-  // ── Fotospots Brandenburg ─────────────────────────────────────────────
   ["Kahla – Stellwerk","f",52.156,13.822,"Stellwerk"],
   ["Bärhaus – Schranke & Stellwerk","t",52.180,13.850,"Schrankenposten (unbestätigt)"],
   ["Schwarzbach – Schranke","f",52.290,13.780,"Schranke (unbestätigt)"],
@@ -426,7 +421,6 @@ var H = [
   ["Joachimsthal – Bahnhof","t",52.985,13.760,"Bahnhof"],
   ["Wiesenburg – Bahnhof","f",52.066,12.441,"Bahnhof"],
   ["Reetz – Bahnübergang","f",52.086,12.583,"Bahnübergang (unbestätigt)"],
-  // ── Fotospots Mecklenburg-Vorpommern ──────────────────────────────────
   ["Anklam – Brücke","f",53.856,13.700,"Brücke (unbestätigt)"],
   ["Dolgen – Bahnhof","f",53.648,12.528,"Bahnhof (unbestätigt)"],
   ["Feldberg – Bahnhof","f",53.338,13.430,"Bahnhof (unbestätigt)"],
@@ -471,7 +465,6 @@ var H = [
   ["Freienohl – Tunnel","f",51.374,8.419,"Tunnel"],
   ["Arnsberg – Viadukt","f",51.398,8.071,"Viadukt"],
   ["Remscheid-Lütringhausen – Bahnhof","f",51.188,7.196,"Bahnhof"],
-  // ── Neue Fotospots ────────────────────────────────────────────────────
   ["Überlingen (Bodensee) – Hafen","f",47.769,9.162,"Hafen am Bodensee"],
   ["Vilshofen – Kirche","f",48.629,13.178,"Kirchenmotiv"],
   ["Ruderatshofen – Kirche und Alpen","f",47.808,10.566,"Kirche mit Alpenpanorama"],
@@ -529,7 +522,6 @@ var H = [
   ["Rottweil – Häuserzeile","t",48.165,8.627,"Historische Häuserfronten"],
   ["Pflach – Brücke","f",47.578,10.716,"Brücke nahe dt. Grenze"],
   ["Salzgitter – Brücke","f",52.158,10.330,"Brücke"],
-  // ── Neue Fotospots Batch 2 ────────────────────────────────────────────
   ["Katharinenheerd – Kirche","f",54.330,8.890,"Kirche"],
   ["Beckedorf – Bahnhof","f",53.756,9.984,"Bahnhof"],
   ["Uenzen – Ortsdurchfahrt","f",52.960,10.540,"Ortsdurchfahrt"],
@@ -578,8 +570,6 @@ var H = [
   ["Felsberg – Burg","f",51.141,9.421,"Burg Felsberg"],
   ["Langenhahn – Bahnhof","f",50.624,7.807,"Bahnhof"],
   ["Bamberg – Fabrik","f",49.899,10.891,"Fabrikkulisse"],
-
-  // ── Sachsen-Anhalt – neue Fotospots ──────────────────────────────────
   ["Lübs – Bahnhof","f",52.260,12.160,"Bahnhof"],
   ["Quedlinburg – Teufelsmauer","f",51.792,11.155,"Felsformation Teufelsmauer"],
   ["Thumkuhlental – HSB","f",51.740,11.090,"Harzer Schmalspurbahn"],
@@ -619,7 +609,6 @@ var H = [
   ["Reinsdorf – Burg","f",51.501,11.418,"Burg (unbestätigt)"],
   ["Gommern – Stellwerk","f",52.065,11.837,"Stellwerk"],
   ["Thumkuhlental – Tunnel","f",51.741,11.091,"Tunnel"],
-  // ── Sachsen-Anhalt – TOPMOTIVE ────────────────────────────────────────
   ["Annaburg – Bahnhof","t",51.724,13.037,"Bahnhof · Topmotiv"],
   ["Teuchern – Stellwerk & Schranke","t",51.092,11.946,"Stellwerk und Schranke · Topmotiv"],
   ["Kleinheringen – Viadukt","t",51.322,11.699,"Viadukt · Topmotiv"],
@@ -637,7 +626,6 @@ var H = [
   ["Wernigerode – Schloss","t",51.834,10.785,"Schloss Wernigerode · Topmotiv"],
   ["Harzgerode – HSB","t",51.643,11.135,"HSB Harzgerode · Topmotiv"],
   ["Ilberstedt – Förderturm","t",51.775,11.751,"Förderturm · Topmotiv"],
-  // ── Schleswig-Holstein – Topmotive ────────────────────────────────────
   ["Elpersbüttlerdorn – Heidelandschaft","t",54.750,9.100,"Heidelandschaft · Topmotiv"],
   ["Hindenburgdamm – Sonnenaufgang","t",54.893,8.612,"Sonnenaufgang am Sylt-Damm · Topmotiv"],
   ["Rendsburg – Brücke","t",54.306,9.671,"Rendsburger Hochbrücke · Topmotiv"],
@@ -649,10 +637,8 @@ var H = [
   ["Morsumer Kliff – Landschaft","t",54.914,8.388,"Klifflandschaft auf Sylt · Topmotiv"],
   ["Hochdonn – Sonnenuntergang","t",53.950,9.248,"Sonnenuntergang am NOK-Viadukt · Topmotiv"],
   ["Kiel – Hafen","t",54.323,10.135,"Kieler Hafen · Topmotiv"],
-  // ── Schleswig-Holstein – Fotospots ────────────────────────────────────
   ["Lauenburg (Elbe) – Fluss","f",53.370,10.565,"Elblandschaft"],
   ["Hattstedt – Kirche","f",54.644,9.079,"Kirche"],
-  // ── Niedersachsen – Topmotive ─────────────────────────────────────────
   ["Beckedorf (Celle) – OHE Bahnhof","t",52.570,10.140,"OHE-Bahnhof · Topmotiv"],
   ["Banteln – Bergblick","t",52.098,9.740,"Bergblick · Topmotiv"],
   ["Bruchhausen-Vilsen – Bahnhof","t",52.826,8.996,"Museumsbahn-Bf · Topmotiv"],
@@ -680,7 +666,6 @@ var H = [
   ["Nortmoor – See","t",53.218,7.741,"See · Topmotiv"],
   ["Einbeck Mitte – Ortsdurchfahrt","t",51.820,9.865,"Ortsdurchfahrt · Topmotiv"],
   ["Salzgitter – Brücke","t",52.158,10.330,"Brücke · Topmotiv"],
-  // ── Niedersachsen – Fotospots ─────────────────────────────────────────
   ["Ohlenrode – NBS","f",52.030,9.920,"Neubaustrecke (unbestätigt)"],
   ["Opperhausen – NBS","f",51.780,9.910,"Neubaustrecke (unbestätigt)"],
   ["Freden – Bahnwärterhaus","f",51.905,9.867,"Bahnwärterhaus"],
@@ -708,34 +693,25 @@ var H = [
   ["Diesten – Landschaft","f",52.028,9.785,"Landschaft (unbestätigt)"],
   ["Linsburg – Landschaft","f",52.560,9.530,"Landschaft"],
   ["Langwedel – Landschaft","f",52.977,9.152,"Landschaft"],
-  ["Heiligenfelde – See","f",52.882,8.829,"See"]
-
-  // ── Brandenburg – neue Fotospots ─────────────────────────────────────
+  ["Heiligenfelde – See","f",52.882,8.829,"See"],
   ["Klenzenhof – Schmalspur","f",53.100,11.800,"Schmalspurbahn (unbestätigt)"],
   ["Neuendorf – Bahnhof","f",52.200,13.100,"Bahnhof (unbestätigt)"],
   ["Thyrow – See","f",52.190,13.240,"See"],
   ["Velten – Bahnhof","f",52.688,13.180,"Bahnhof"],
   ["Herzberg (Elster) – Bahnhof","f",51.690,13.234,"Bahnhof"],
   ["Rüdnitz – Bahnhof","f",52.742,13.750,"Bahnhof"],
-  ["Beeskow – Bahnhof","f",52.170,14.244,"Bahnhof (unbestätigt)"]
-
-  // ── Mecklenburg-Vorpommern – Topmotive ───────────────────────────────
+  ["Beeskow – Bahnhof","f",52.170,14.244,"Bahnhof (unbestätigt)"],
   ["Rostock – Hafen","t",54.152,12.099,"Hafen · Topmotiv"],
   ["Lietzow – See","t",54.430,13.529,"Kleiner Jasmunder Bodden · Topmotiv"],
   ["Wismar – Hafen","t",53.897,11.458,"Hafen · Topmotiv"],
   ["Neustrelitz – Bahnhof","t",53.361,13.073,"Bahnhof · Topmotiv"],
   ["Stralsund – Hafen","t",54.312,13.089,"Hafen · Topmotiv"],
-  // ── Mecklenburg-Vorpommern – Fotospots ───────────────────────────────
   ["Wolgast – Brücke","f",54.055,13.765,"Brücke"],
-  ["Wendisch Priborn – Schranke","f",53.410,12.390,"Bahnschranke (unbestätigt)"]
-
-  // ── Saarland ──────────────────────────────────────────────────────────
+  ["Wendisch Priborn – Schranke","f",53.410,12.390,"Bahnschranke (unbestätigt)"],
   ["Beckingen – Bahnhof","t",49.402,6.703,"Bahnhof · Topmotiv"],
   ["Saarbrücken – Häuser","t",49.234,6.997,"Häuser · Topmotiv"],
   ["Mettlach – Saar","f",49.493,6.593,"Saarlandschaft"],
-  ["Luisenthal – Förderschacht","f",49.354,6.868,"Förderschacht"]
-
-  // ── Baden-Württemberg – Topmotive ────────────────────────────────────
+  ["Luisenthal – Förderschacht","f",49.354,6.868,"Förderschacht"],
   ["Gutach – Schwarzwaldbahn","t",48.152,8.209,"Schwarzwaldbahn · Topmotiv"],
   ["Hausen im Tal – Bahnhof","t",48.024,8.872,"Donautal · Topmotiv"],
   ["Herrenberg – Landschaft","t",48.594,8.868,"Landschaft · Topmotiv"],
@@ -796,8 +772,7 @@ var H = [
   ["Kollmarsreute – Landschaft","t",48.083,7.856,"Landschaft · Topmotiv"],
   ["Gengenbach – Fluss","t",48.403,8.013,"Kinzig · Topmotiv"],
   ["Roßberg – Bahnhof","t",47.881,9.737,"Bahnhof · Topmotiv"],
-  ["Storzingen – Bahnhof","t",48.042,9.175,"Bahnhof · Topmotiv"]
-  // ── Baden-Württemberg – Fotospots ─────────────────────────────────────
+  ["Storzingen – Bahnhof","t",48.042,9.175,"Bahnhof · Topmotiv"],
   ["Obergimpern – Landschaft","f",49.233,9.100,"Landschaft"],
   ["Neidingen – Landschaft","f",48.043,8.914,"Donautal"],
   ["Stuttgart Hesslach – Tunnel","f",48.754,9.162,"Tunnel"],
@@ -1272,7 +1247,7 @@ var D = [
 ];
 var VISITED=new Set(JSON.parse(localStorage.getItem("fs-v")||"[]"));
 function saveLoc(){localStorage.setItem("fs-v",JSON.stringify([...VISITED]));}
-function loadSB(){try{fetch(SB_URL+"/rest/v1/"+SB_TABLE+"?select=location_name",{headers:sbH()}).then(function(r){return r.json();}).then(function(rows){if(!Array.isArray(rows))return;VISITED.clear();rows.forEach(function(r){VISITED.add(r.location_name);});saveLoc();refresh();applyFilter();applyHL();updateP();renderList();}).catch(function(){});}catch(e){}}
+function loadVisited(){try{fetch(SB_URL+"/rest/v1/"+SB_TABLE+"?select=location_name",{headers:sbH()}).then(function(r){return r.json();}).then(function(rows){if(!Array.isArray(rows))return;VISITED.clear();rows.forEach(function(r){VISITED.add(r.location_name);});saveLoc();refresh();applyFilter();applyHL();updateP();renderList();}).catch(function(){});}catch(e){}}
 function effAnn(n){var a=ANN[n]||null;return(VISITED.has(n)&&a!=="p"&&a!=="i")?"v":a;}
 function mkSig(status,ann){var sc=SC[status],ac=ann?AC[ann]:null,badge=ac?"<div style=\"position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:"+ac.col+";border:1.5px solid #fff;border-radius:50%;\"></div>":"";return L.divIcon({className:"",html:"<div style=\"position:relative;width:14px;height:14px\"><div style=\"position:absolute;top:1px;left:1px;width:12px;height:12px;background:"+sc.col+";border:1.5px solid "+sc.dark+";border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.4);\"></div>"+badge+"</div>",iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-9]});}
 function mkHL(kat,vis){var hc=HC[kat]||HC.f,op=vis?"opacity:.45;":"",badge=vis?"<div style=\"position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:#16a085;border:1.5px solid #fff;border-radius:50%;\"></div>":"";return L.divIcon({className:"",html:"<div style=\"position:relative;width:12px;height:12px\"><div style=\"width:12px;height:12px;background:"+hc.col+";border:1.5px solid "+hc.dark+";transform:rotate(45deg);"+op+"\"></div>"+badge+"</div>",iconSize:[12,12],iconAnchor:[6,6],popupAnchor:[0,-8]});}
@@ -1293,13 +1268,13 @@ function tog(type,key){var chipId=type==="s"?"cs"+key:type==="a"?"ca"+key:"ch"+k
 function guessLand(lat,lng){if(lat>54.3)return"SH";if(lat>53.8&&lng>10.9)return"MV";if(lat>53.5&&lng>13.8)return"MV";if(lat>53.0&&lng>14.0)return"BB";if(lat>53.0&&lng>11.5&&lng<14.0)return"MV";if(lat>52.3&&lat<54.0&&lng>11.5&&lng<14.6)return"BB";if(lat>51.8&&lat<53.0&&lng>9.8&&lng<12.8)return"ST";if(lat>52.0&&lat<53.8&&lng>6.5&&lng<10.0)return"NI";if(lat>51.0&&lat<52.2&&lng>5.9&&lng<9.5)return"NW";if(lat>50.2&&lat<51.8&&lng>11.8&&lng<15.2)return"SN";if(lat>50.1&&lat<51.7&&lng>9.9&&lng<12.7)return"TH";if(lat>49.4&&lat<51.6&&lng>7.8&&lng<10.3)return"HE";if(lat>47.5&&lat<50.5&&lng>7.5&&lng<10.6)return"BW";if(lat>47.3&&lat<50.6&&lng>10.5)return"BY";if(lat>49.1&&lat<50.9&&lng>6.0&&lng<8.5)return"RP";return"SL";}
 function updateP(){var tot=D.length+H.length,done=0;D.forEach(function(r){if(VISITED.has(r[0]))done++;});H.forEach(function(r){if(VISITED.has(r[0]))done++;});document.getElementById("lp-done").textContent=done;document.getElementById("lp-total").textContent=tot;document.getElementById("list-progress-fill").style.width=(tot?Math.round(done/tot*100):0)+"%";}
 function toggleVisited(name){if(VISITED.has(name)){VISITED.delete(name);sbDel(name);}else{VISITED.add(name);sbAdd(name);}saveLoc();refresh();applyFilter();applyHL();updateP();renderList();}
-function renderList(){var q=document.getElementById("list-search").value.toLowerCase(),fL=document.getElementById("fl-land").value,fK=document.getElementById("fl-kat").value,fS=document.getElementById("fl-status").value,all=[];if(!fK||fK==="signal"){D.forEach(function(r){var land=r[4],done=VISITED.has(r[0]);if(fL&&land!==fL)return;if(fS==="open"&&done)return;if(fS==="done"&&!done)return;if(q&&r[0].toLowerCase().indexOf(q)<0)return;all.push({name:r[0],sub:r[5]+" &middot; KBS "+r[6],land:land,done:done});});}if(!fK||fK!=="signal"){H.forEach(function(r){if(fK&&fK!==r[1])return;var land=guessLand(r[2],r[3]),done=VISITED.has(r[0]);if(fL&&land!==fL)return;if(fS==="open"&&done)return;if(fS==="done"&&!done)return;if(q&&r[0].toLowerCase().indexOf(q)<0)return;all.push({name:r[0],sub:(HC[r[1]]?HC[r[1]].lbl:"")+(r[4]?" &middot; "+r[4]:""),land:land,done:done});});}var byL={};all.forEach(function(item){var l=LN[item.land]||item.land;if(!byL[l])byL[l]=[];byL[l].push(item);});var html="";Object.keys(byL).sort().forEach(function(ln){var items=byL[ln],dc=items.filter(function(i){return i.done;}).length;html+="<div class=\"list-group\"><div class=\"list-group-header\">"+ln+" <span style=\"font-weight:400;opacity:.6\">"+dc+"/"+items.length+"</span></div>";items.sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(item){var enc=item.name.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");html+="<div class=\"list-item"+(item.done?" done":"")+"\" data-name=\""+enc+"\"><div class=\"li-check\">"+(item.done?"&#10003;":"")+"</div><div><div class=\"li-name\">"+item.name+"</div><div class=\"li-sub\">"+item.sub+"</div></div></div>";});html+="</div>";});if(!html)html="<div style=\"text-align:center;padding:40px;color:#aaa;font-size:13px\">Keine Eintr&#228;ge gefunden</div>";var body=document.getElementById("list-body");body.innerHTML=html;body.onclick=function(e){var item=e.target.closest(".list-item");if(item)toggleVisited(item.getAttribute("data-name"));};}
-function populateDD(){var lands=new Set();D.forEach(function(r){lands.add(r[4]);});H.forEach(function(r){lands.add(guessLand(r[2],r[3]));});var sel=document.getElementById("fl-land");[...lands].filter(function(l){return LN[l];}).sort(function(a,b){return(LN[a]||a).localeCompare(LN[b]||b);}).forEach(function(l){var o=document.createElement("option");o.value=l;o.textContent=LN[l]||l;sel.appendChild(o);});}
-function showTab(tab){document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});if(tab==="map"){document.getElementById("screen-map").style.display="flex";document.getElementById("screen-list").style.display="none";document.querySelector(".tab:nth-child(1)").classList.add("active");theMap.invalidateSize();loadSB();}else{document.getElementById("screen-map").style.display="none";document.getElementById("screen-list").style.display="flex";document.querySelector(".tab:nth-child(2)").classList.add("active");updateP();renderList();loadSB();}}
+function renderList(){var q=document.getElementById("list-search").value.toLowerCase(),fL=document.getElementById("fl-land").value,fK=document.getElementById("fl-kat").value,fS=document.getElementById("fl-status").value,all=[];if(!fK||fK==="signal"){D.forEach(function(r){var land=r[4],done=VISITED.has(r[0]);if(fL&&land!==fL)return;if(fS==="open"&&done)return;if(fS==="done"&&!done)return;if(q&&r[0].toLowerCase().indexOf(q)<0)return;all.push({name:r[0],sub:r[5]+" &middot; KBS "+r[6],land:land,done:done});});}if(!fK||fK!=="signal"){H.forEach(function(r){if(fK&&fK!==r[1])return;var land=guessLand(r[2],r[3]),done=VISITED.has(r[0]);if(fL&&land!==fL)return;if(fS==="open"&&done)return;if(fS==="done"&&!done)return;if(q&&r[0].toLowerCase().indexOf(q)<0)return;all.push({name:r[0],sub:(HC[r[1]]?HC[r[1]].lbl:"")+(r[4]?" &middot; "+r[4]:""),land:land,done:done});});}var byL={};all.forEach(function(item){var l=LN[item.land]||item.land;if(!byL[l])byL[l]=[];byL[l].push(item);});var html="";Object.keys(byL).sort().forEach(function(ln){var items=byL[ln],dc=items.filter(function(i){return i.done;}).length;html+="<div class=\"list-group\"><div class=\"list-group-header\">"+ln+" <span style=\"font-weight:400;opacity:.6\">"+dc+"/"+items.length+"</span></div>";items.sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(item){var enc=item.name.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");html+="<div class=\"list-item"+(item.done?" done":"")+"\" data-name=\""+enc+"\"><div class=\"li-check\">"+(item.done?"&#10003;":"")+"</div><div><div class=\"li-name\">"+item.name+"</div><div class=\"li-sub\">"+item.sub+"</div></div></div>";});html+="</div>";});if(!html)html="<div style=\"text-align:center;padding:40px;color:#aaa;font-size:13px\">Keine Einträge gefunden</div>";var body=document.getElementById("list-body");body.innerHTML=html;body.onclick=function(e){var item=e.target.closest(".list-item");if(item)toggleVisited(item.getAttribute("data-name"));};}
+function populateDD(){var lands=new Set();D.forEach(function(r){lands.add(r[4]);});H.forEach(function(r){lands.add(guessLand(r[2],r[3]));});var sel=document.getElementById("fl-land");sel.innerHTML="<option value=\"\">Alle Bundesländer</option>";[...lands].filter(function(l){return LN[l];}).sort(function(a,b){return(LN[a]||a).localeCompare(LN[b]||b);}).forEach(function(l){var o=document.createElement("option");o.value=l;o.textContent=LN[l]||l;sel.appendChild(o);});}
+function showTab(tab){document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});if(tab==="map"){document.getElementById("screen-map").style.display="flex";document.getElementById("screen-list").style.display="none";document.querySelector(".tab:nth-child(1)").classList.add("active");theMap.invalidateSize();loadVisited();}else{document.getElementById("screen-map").style.display="none";document.getElementById("screen-list").style.display="flex";document.querySelector(".tab:nth-child(2)").classList.add("active");updateP();renderList();loadVisited();}}
 try{if("serviceWorker"in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(sw){sw.unregister();});}).catch(function(){});}}catch(e){}
 applyFilter();
 populateDD();
-loadSB();
+loadVisited();
 </script>
 </body>
 </html>

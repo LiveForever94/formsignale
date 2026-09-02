@@ -58,7 +58,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;}
 <div id="app">
 <div id="header">
   <div class="hl">&#x1F6A6;</div>
-  <div class="ht"><h1>Formsignale in Deutschland</h1><p>Quelle: FormsignalBahnhofsVerzeichnis</p></div>
+  <div class="ht"><h1>Formsignale in Deutschland</h1><p>Quelle: FormsignalBahnhofsVerzeichnis &nbsp;|&nbsp; <b style="color:#3498db">v36</b></p></div>
 </div>
 <div id="tabs">
   <div class="tab active" onclick="showTab('map')">&#x1F5FA; Karte</div>
@@ -1511,7 +1511,7 @@ function showTab(tab){document.querySelectorAll(".tab").forEach(function(t){t.cl
 try{if("serviceWorker"in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(sw){sw.unregister();});}).catch(function(){});}}catch(e){}
 applyFilter();
 populateDD();
-loadVisited();
+if(location.protocol!=="file:")loadVisited();
 </script>
 </body>
 </html>

@@ -58,7 +58,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;}
 <div id="app">
 <div id="header">
   <div class="hl">&#x1F6A6;</div>
-  <div class="ht"><h1>Formsignale in Deutschland</h1><p>Quelle: FormsignalBahnhofsVerzeichnis &nbsp;|&nbsp; <b style="color:#3498db">v37</b></p></div>
+  <div class="ht"><h1>Formsignale in Deutschland</h1><p>Quelle: FormsignalBahnhofsVerzeichnis &nbsp;|&nbsp; <b style="color:#3498db">v39</b></p></div>
 </div>
 <div id="tabs">
   <div class="tab active" onclick="showTab('map')">&#x1F5FA; Karte</div>
@@ -81,7 +81,6 @@ body{font-family:"Segoe UI",Arial,sans-serif;}
     </div>
     <div class="fr">
       <span class="rl">Highlights:</span>
-      <button class="chip off" id="chb" style="background:#c0392b" onclick="tog('h','b')">&#9670; Bauwerke <span class="n" id="nhb">0</span></button>
       <button class="chip off" id="chm" style="background:#7f8c00" onclick="tog('h','m')">&#9670; Museumsbahnen <span class="n" id="nhm">0</span></button>
       <button class="chip off" id="chf" style="background:#6c3483" onclick="tog('h','f')">&#9670; Fotospots <span class="n" id="nhf">0</span></button>
       <button class="chip off" id="cht" style="background:#d4860b" onclick="tog('h','t')">&#11088; Topmotive <span class="n" id="nht">0</span></button>
@@ -102,7 +101,6 @@ body{font-family:"Segoe UI",Arial,sans-serif;}
         <option value="signal">Formsignale</option>
         <option value="f">Fotospots</option>
         <option value="m">Museumsbahnen</option>
-        <option value="b">Bauwerke</option>
       </select>
       <select id="fl-status" onchange="renderList()">
         <option value="">Alle</option>
@@ -118,7 +116,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;}
 "use strict";
 var SC={1:{col:"#27ae60",dark:"#1a6632",lbl:"Formsignale aktiv",sym:"&#9679;"},3:{col:"#e67e22",dark:"#9a4000",lbl:"Zustand unsicher",sym:"&#9681;"},5:{col:"#8e44ad",dark:"#5b2c6f",lbl:"Änderung geplant",sym:"&#9680;"},7:{col:"#e74c3c",dark:"#922b21",lbl:"Änderung laufend",sym:"&#9684;"}};
 var AC={p:{col:"#2980b9",lbl:"Zeitnah besuchen",sym:"&#9658;"},i:{col:"#e6b800",lbl:"Interessant",sym:"&#9733;"},v:{col:"#16a085",lbl:"Bereits besucht",sym:"&#10003;"}};
-var HC={b:{col:"#c0392b",dark:"#922b21",lbl:"Bauwerk"},m:{col:"#7f8c00",dark:"#4a5300",lbl:"Museumsbahn"},f:{col:"#6c3483",dark:"#4a235a",lbl:"Fotospot"},t:{col:"#d4860b",dark:"#9a5c00",lbl:"Topmotiv"}};
+var HC={m:{col:"#7f8c00",dark:"#4a5300",lbl:"Museumsbahn"},f:{col:"#6c3483",dark:"#4a235a",lbl:"Fotospot"},t:{col:"#d4860b",dark:"#9a5c00",lbl:"Topmotiv"}};
 var LN={"BW":"Baden-Württemberg","BY":"Bayern","BE":"Berlin","BB":"Brandenburg","HB":"Bremen","HH":"Hamburg","HE":"Hessen","MV":"Mecklenburg-Vorpommern","NI":"Niedersachsen","NW":"Nordrhein-Westfalen","RP":"Rheinland-Pfalz","SL":"Saarland","SN":"Sachsen","ST":"Sachsen-Anhalt","SH":"Schleswig-Holstein","TH":"Thüringen"};
 var SB_URL="https://vcoutgfdphaisxbhswvo.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjb3V0Z2ZkcGhhaXN4Ymhzd3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYwMjgsImV4cCI6MjA5ODE2MjAyOH0.fHHYFEfJFtahguVM0XBjn8dcM6-WX89Uaz_VtyYdpfM",SB_TABLE="formsignale",USER_ID="stefan";
 function sbH(){return{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"};}
@@ -263,8 +261,8 @@ var ANN = {
   "Zeitz Pbf":                       "v",
 };
 var H = [
-  ["Göltzschtalbrücke","b",50.578,12.270,"Größte Ziegelsteinbrücke der Welt (1851) · 78m hoch, 574m lang · bei Mylau/Netzschkau","https://de.wikipedia.org/wiki/G%C3%B6ltzschtalviadukt"],
-  ["Elstertalbrücke","b",50.597,12.210,"Zweitgrößte Ziegelsteinbrücke Deutschlands (1851) · 68m hoch, 279m lang · bei Pirk","https://de.wikipedia.org/wiki/Elstertalviadukt"],
+  ["Göltzschtalbrücke","t",50.578,12.270,"Größte Ziegelsteinbrücke der Welt (1851) · 78m hoch, 574m lang · bei Mylau/Netzschkau","https://de.wikipedia.org/wiki/G%C3%B6ltzschtalviadukt"],
+  ["Elstertalbrücke","t",50.597,12.210,"Zweitgrößte Ziegelsteinbrücke Deutschlands (1851) · 68m hoch, 279m lang · bei Pirk","https://de.wikipedia.org/wiki/Elstertalviadukt"],
   ["Harzer Schmalspurbahnen (HSB)","m",51.834,10.784,"140 km Dampfbahn-Streckennetz · täglich ganzjährig · Brocken, Wernigerode, Quedlinburg","https://www.hsb-wr.de"],
   ["Rasender Roland – Rügen","m",54.357,13.473,"750 mm · Putbus–Göhren · täglich Mai–Okt, stündlich · 650.000 Fahrgäste/Jahr","https://www.ruegen-baederbahn.de"],
   ["Mecklenburgische Bäderbahn Molli","m",54.106,11.897,"900 mm · Bad Doberan–Kühlungsborn · täglich ganzjährig · fährt durch Innenstadt Bad Doberan","https://www.molli-bahn.de"],
@@ -467,10 +465,8 @@ var H = [
   ["Remscheid-Lütringhausen – Bahnhof","f",51.188,7.196,"Bahnhof"],
   ["Überlingen (Bodensee) – Hafen","f",47.769,9.162,"Hafen am Bodensee"],
   ["Vilshofen – Kirche","f",48.629,13.178,"Kirchenmotiv"],
-  ["Ruderatshofen – Kirche und Alpen","f",47.808,10.566,"Kirche mit Alpenpanorama"],
   ["Bad Kreckelmoos – Berge","f",47.520,10.280,"Berglandschaft (unbestätigt)"],
   ["Witten – Ruhrtalviadukt","f",51.440,7.360,"Ruhrtalviadukt"],
-  ["Morsum Kliff (Sylt)","f",54.914,8.388,"Geologisches Kliff auf Sylt"],
   ["Blankenberg (Sieg) – Brücke","f",50.770,7.530,"Brücke an der Sieg"],
   ["Siegburg – Burg","f",50.795,7.207,"Burg Blankenberg"],
   ["Berga-Kelbra – Bahnhof","f",51.536,10.956,"Bahnhof"],
@@ -478,8 +474,6 @@ var H = [
   ["Kämmereiforst – Bahnhof","f",52.140,10.550,"Bahnhof"],
   ["Wustermark Rbf – Formsignale","f",52.543,12.952,"Formsignale im Rbf"],
   ["Annaberg-Buchholz – Bad","f",50.578,12.999,"Bahnhof Bad"],
-  ["Flechtlingen – Formsignale","f",52.337,11.196,"Formsignale"],
-  ["Meppen – Formsignale","f",52.693,7.293,"Formsignale"],
   ["Amthausen – Landschaft","f",51.780,11.110,"Landschaft"],
   ["Münchhausen – Dorfblick","f",50.964,8.919,"Dorfblick"],
   ["Biendorf – Stellwerk","f",51.820,11.623,"Stellwerk"],
@@ -516,7 +510,6 @@ var H = [
   ["Gundersleben – Landschaft","f",51.610,11.510,"Landschaft"],
   ["Laufenburg – Stadtblick","f",47.565,8.064,"Stadtblick am Rhein"],
   ["Scheinfeld – Landschaft","f",49.670,10.466,"Landschaft (unbestätigt)"],
-  ["Sipplingen (Bodensee) – Hafen","f",47.790,9.099,"Hafen am Bodensee"],
   ["Prödel – Schranke","f",52.269,11.898,"Bahnschranke"],
   ["Trebnitz – Formsignale","f",51.230,11.880,"Formsignale"],
   ["Rottweil – Häuserzeile","t",48.165,8.627,"Historische Häuserfronten"],
@@ -532,7 +525,6 @@ var H = [
   ["Pappenheim – Landschaft","f",48.937,10.971,"Altmühltal-Landschaft"],
   ["Neubruxdorf – Bahnhof","f",52.600,11.880,"Bahnhof (unbestätigt)"],
   ["Nassenbeuren – Kirche","t",47.970,10.450,"Kirche"],
-  ["Estorf (Weser) – Signal","f",52.534,9.297,"Formsignal"],
   ["Rollhofen – Landschaft","f",49.560,11.280,"Landschaft"],
   ["Frankfurt West – Stadt","f",50.120,8.628,"Stadtpanorama"],
   ["Ziegelberg – Landschaft","f",50.990,11.080,"Landschaft (unbestätigt)"],
@@ -558,7 +550,6 @@ var H = [
   ["Wegeleben – Kurve","f",51.875,11.140,"Streckenkurve"],
   ["Börnecke – Bahnübergang","f",51.793,10.921,"Bahnübergang"],
   ["Ilberstedt – Stellwerk","f",51.775,11.751,"Stellwerk"],
-  ["Worpswede – Windmühle","f",53.222,8.928,"Windmühle"],
   ["Wuppertal Sonnborn – Viadukt","f",51.244,7.108,"Sonnborner Viadukt"],
   ["Ravennaviadukt (Höllental)","f",47.940,8.058,"Ravennaviadukt bei Freiburg"],
   ["Endingen (Kaiserstuhl) – Brauerei","f",48.141,7.700,"Brauerei"],
@@ -567,7 +558,7 @@ var H = [
   ["Meißen – Brücke","f",51.163,13.474,"Brücke"],
   ["Schwarzkopftunnel – Stellwerk","f",50.990,9.780,"Stellwerk"],
   ["Hettstedt – Signale","f",51.648,11.506,"Formsignale"],
-  ["Felsberg – Burg","f",51.141,9.421,"Burg Felsberg"],
+  ["Felsberg – Burg","t",51.141,9.421,"Burg Felsberg · Topmotiv"],
   ["Langenhahn – Bahnhof","f",50.624,7.807,"Bahnhof"],
   ["Bamberg – Fabrik","t",49.899,10.891,"Fabrikkulisse"],
   ["Lübs – Bahnhof","f",52.260,12.160,"Bahnhof"],
@@ -680,7 +671,6 @@ var H = [
   ["Soltau – Signale","f",52.981,9.835,"Formsignale"],
   ["Georgmarienshütte – Bahnübergang","f",52.197,8.038,"Bahnübergang"],
   ["Huxhahl – Landschaft","f",51.980,9.250,"Landschaft (unbestätigt)"],
-  ["Salzgitter-Ringelheim – Signale","f",52.058,10.388,"Formsignale"],
   ["Egenstedt – Dorfblick","f",52.140,10.010,"Dorfblick"],
   ["Dehnsen – Kirche","f",51.950,9.880,"Kirche (unbestätigt)"],
   ["Westerwalsede – Moorexpress","f",53.150,9.220,"Moorexpress"],
@@ -801,7 +791,6 @@ var H = [
   ["Riedöschingen – Landschaft","f",47.878,8.644,"Landschaft"],
   ["Möhringen (Tuttlingen) – Landschaft","f",47.964,8.745,"Landschaft"],
   ["Kehl – Hafen","f",48.574,7.813,"Hafen"],
-  ["Riegel a. K. – Brauerei","f",48.154,7.738,"Brauerei"],
   ["Mühlhausen-Ehingen – Landschaft","f",47.938,8.827,"Landschaft"],
   ["Beuron – Kloster","f",48.020,8.972,"Kloster im Donautal"],
   ["Röt – Landschaft","f",48.160,8.020,"Schwarzwald"],
@@ -823,7 +812,6 @@ var H = [
   ["Marbach – Teich","f",48.940,9.264,"Teich"],
   ["Fützen – Viadukt","f",47.730,8.520,"Wutachtalbahn Viadukt"],
   ["Weikersheim – Brücke","f",49.480,9.898,"Brücke"],
-  ["Niederwasser – Schwarzwald","f",48.280,8.330,"Schwarzwald"],
   ["Beckhofen-Klengen – See","f",47.990,8.620,"See (unbestätigt)"],
   ["Weisenbach – Kirche","f",48.609,8.260,"Kirche"],
   ["Zütlingen – Brücke","f",49.337,9.337,"Brücke"],
@@ -907,7 +895,6 @@ var H = [
   ["Niederaudorf – Kloster","t",47.700,12.148,"Kloster · Topmotiv"],
   ["Fischhaus – Fluss","t",49.426,12.037,"Fluss · Topmotiv"],
   ["Mariaort – Brücke","t",49.018,12.004,"Brücke · Topmotiv"],
-  ["Kothmaißling – Signal","t",49.152,11.828,"Formsignal · Topmotiv"],
   ["Regenstauf – Brücke","t",49.121,12.126,"Brücke · Topmotiv"],
   ["Bogen – Brücke","t",48.909,12.693,"Brücke · Topmotiv"],
   ["Regen – Brücke","t",48.969,13.128,"Brücke · Topmotiv"],
@@ -1136,7 +1123,128 @@ var H = [
   ["Aubenhausen – Landschaft","f",48.051,12.031,"Landschaft"],
   ["Saaldorf – Berge","f",47.846,12.920,"Berge"],
   ["Osterhofen – Berge","f",48.697,13.019,"Berge"],
-  ["Maria Rain – Landschaft","f",48.540,13.471,"Landschaft"]
+  ["Maria Rain – Landschaft","f",48.540,13.471,"Landschaft"],
+
+  // ── Hessen – Topmotive ────────────────────────────────────────────────
+  ["Oberrieden – Viadukt","t",49.573,8.958,"Odenwaldbahn Viadukt · Topmotiv"],
+  ["Trechtingshausen – Burg Reichenstein","t",49.974,7.795,"Burg Reichenstein · Topmotiv"],
+  ["Trechtingshausen – Burg Rheinstein","t",50.004,7.732,"Burg Rheinstein · Topmotiv"],
+  ["Neckarsteinach – Burgenblick","t",49.390,8.861,"Vier-Burgen-Blick · Topmotiv"],
+  ["Hirschhorn – Burg","t",49.441,8.905,"Burg Hirschhorn · Topmotiv"],
+  ["Kailbach – Landschaft","t",49.507,9.020,"Odenwald · Topmotiv"],
+  ["Kreuzungsbahnhof Hammerberg – Landschaft","t",49.520,9.030,"Odenwaldbahn-Kreuzung · Topmotiv"],
+  ["Hetzbach – Viadukt","t",49.580,8.995,"Odenwaldbahn Viadukt · Topmotiv"],
+  ["Frankfurt-Oberrad – Skyline","t",50.098,8.717,"Frankfurter Skyline · Topmotiv"],
+  ["Frankfurt – Deutschherrnbrücke","t",50.106,8.697,"Deutschherrnbrücke · Topmotiv"],
+  ["Wirtheim – Landschaft","t",50.264,9.336,"Kinzigtal · Topmotiv"],
+  ["Schlüchtern – Landschaft","t",50.350,9.520,"Kinzigtal · Topmotiv"],
+  ["Sterbfritz – Burg","t",50.309,9.475,"Burg Brandenstein · Topmotiv"],
+  ["Jossa – Viadukt","t",50.199,9.560,"Viadukt · Topmotiv"],
+  ["Burghaun – Tunnel","t",50.706,9.762,"Tunnel · Topmotiv"],
+  ["Hermannspiegel – Landschaft","t",50.770,9.790,"Landschaft (unbestätigt) · Topmotiv"],
+  ["Heringen (Werra) – Industrie","t",51.005,10.000,"Kaliwerk · Topmotiv"],
+  ["Wölfershausen – Landschaft","t",50.980,10.000,"Landschaft (unbestätigt) · Topmotiv"],
+  ["Heimboldshausen – Signale","t",50.870,10.010,"Formsignale · Topmotiv"],
+  ["Kleinvach – Fluss","t",50.900,10.020,"Fluss (unbestätigt) · Topmotiv"],
+  ["Werleshausen – Burg","t",51.230,10.020,"Burg (unbestätigt) · Topmotiv"],
+  ["Bad Sooden-Allendorf – Landschaft","t",51.271,9.960,"Werratal · Topmotiv"],
+  ["Witzenhausen Nord – Felswand","t",51.345,9.860,"Felswand · Topmotiv"],
+  ["Altmorschen – NBS","t",51.020,9.470,"Neubaustrecke · Topmotiv"],
+  ["Guxhagen – Tunnel","t",51.180,9.480,"Tunnel · Topmotiv"],
+  ["Guntershausen – Brücke","t",51.184,9.435,"Brücke · Topmotiv"],
+  ["Schwalmstadt-Allendorf – Bahnwärterhaus","t",50.870,9.230,"Bahnwärterhaus · Topmotiv"],
+  ["Stadtallendorf – Signale","t",50.833,8.972,"Formsignale · Topmotiv"],
+  ["Rüdigheim – Burg","t",50.150,9.050,"Burg (unbestätigt) · Topmotiv"],
+  ["Bürgeln – Fachwerk","t",50.980,8.700,"Fachwerk · Topmotiv"],
+  ["Simtshausen – Kirche","t",50.900,8.630,"Kirche · Topmotiv"],
+  ["Münchhausen – Landschaft","t",51.030,8.620,"Landschaft · Topmotiv"],
+  ["Ederbringhausen – Fluss","t",51.070,8.650,"Eder · Topmotiv"],
+  ["Ederbringhausen – Landschaft","t",51.070,8.650,"Landschaft · Topmotiv"],
+  ["Thalitter – Landschaft","t",51.190,8.780,"Edertal · Topmotiv"],
+  ["Rhena – Viadukt","t",51.240,8.830,"Viadukt · Topmotiv"],
+  ["Willingen – Viadukt","t",51.307,8.598,"Viadukt · Topmotiv"],
+  ["Friedensdorf – Signale","t",50.930,8.500,"Formsignale (unbestätigt) · Topmotiv"],
+  ["Biedenkopf – Landschaft","t",50.921,8.526,"Lahntal · Topmotiv"],
+  ["Dillenburg – Signale","t",50.740,8.285,"Formsignale · Topmotiv"],
+  ["Wilsenroth – Bahnhof","t",50.550,8.070,"Bahnhof · Topmotiv"],
+  ["Wallenrod – Signal","t",50.700,9.320,"Formsignal · Topmotiv"],
+  ["Bad Salzschlirf – Signal","t",50.610,9.590,"Formsignal · Topmotiv"],
+  ["Zierenberg – Viadukt","t",51.380,9.300,"Viadukt · Topmotiv"],
+  // ── Hessen – Fotospots ───────────────────────────────────────────────
+  ["Wiesbaden-Kloppenheim – Brücke","f",50.128,8.290,"Brücke (unbestätigt)"],
+  ["Eppstein – Dorfblick","f",50.144,8.397,"Dorfblick (unbestätigt)"],
+  ["Nauheim – Landschaft","f",49.958,8.438,"Landschaft"],
+  ["Groß-Gerau-Dornberg – Landschaft","f",49.924,8.463,"Landschaft"],
+  ["Dornheim – Landschaft","f",49.921,8.564,"Landschaft"],
+  ["Bürstadt – Signal","f",49.646,8.454,"Formsignal (unbestätigt)"],
+  ["Heppenheim – Burg","f",49.641,8.640,"Starkenburg"],
+  ["Reisen – Landschaft","f",49.628,8.955,"Odenwald"],
+  ["Zotzenbach – Landschaft","f",49.628,8.888,"Odenwald"],
+  ["Rimbach – Landschaft","f",49.647,8.774,"Odenwald"],
+  ["Darmstadt – Odenwaldbahn","f",49.873,8.652,"Odenwaldbahn"],
+  ["Darmstadt Nord – Stellwerk","f",49.885,8.655,"Stellwerk"],
+  ["Darmstadt – Merck Werkseinfahrt","f",49.873,8.630,"Werkseinfahrt Merck"],
+  ["Darmstadt-Kranichstein – Stellwerk","f",49.897,8.687,"Stellwerk"],
+  ["Egelsbach – Landschaft","f",49.965,8.660,"Landschaft"],
+  ["Dreieich-Sprendlingen – Landschaft","f",50.006,8.694,"Landschaft"],
+  ["Götzenhain – Landschaft","f",50.017,8.732,"Landschaft"],
+  ["Eppertshausen – Landschaft","f",49.955,8.836,"Landschaft"],
+  ["Dreieich-Offenthal – Landschaft","f",49.980,8.816,"Landschaft"],
+  ["Darmstadt Eberstadt – Dünen","f",49.827,8.649,"Griesheimer Düne"],
+  ["Frankfurt-Sachsenhausen – Skyline","f",50.101,8.685,"Skyline"],
+  ["Hanau Nord – Häuserzeile","f",50.140,8.925,"Häuserzeile"],
+  ["Bruchköbel – Landschaft","f",50.175,8.940,"Landschaft"],
+  ["Nidderau – Landschaft","f",50.219,8.917,"Landschaft"],
+  ["Kinzighausen – Landschaft","f",50.280,9.380,"Kinzigtal"],
+  ["Elm – Tunnelportal","f",50.300,9.430,"Tunnelportal"],
+  ["Sterbfritz – Bahnhof","f",50.309,9.475,"Bahnhof"],
+  ["Altengronau – Brücke","f",50.291,9.516,"Brücke"],
+  ["Altenfeld – Landschaft","f",50.660,9.750,"Landschaft (unbestätigt)"],
+  ["Hünfeld – Landschaft","f",50.663,9.769,"Landschaft"],
+  ["Haunetal Rhina – Fluss","f",50.750,9.780,"Haune"],
+  ["Haunetal-Neukirchen – Landschaft","f",50.760,9.760,"Landschaft"],
+  ["Unterhaun – Bahnübergang","f",50.740,9.770,"Bahnübergang"],
+  ["Niederaula – Landschaft","f",50.840,9.610,"Landschaft"],
+  ["Gertenbach – Wärterhaus","f",51.100,9.700,"Bahnwärterhaus (unbestätigt)"],
+  ["Beiseförth – Tunnel","f",51.030,9.500,"Tunnel (unbestätigt)"],
+  ["Melsungen – Landschaft","f",51.130,9.550,"Fuldatal"],
+  ["Altenbrunslar – Landschaft","f",51.100,9.450,"Landschaft"],
+  ["Breitenbach Schauenburg – Dampfzug","f",51.320,9.360,"Dampfzug (unbestätigt)"],
+  ["Hümme – Landschaft","f",51.480,9.410,"Landschaft"],
+  ["Haueda – Viadukt","f",51.470,9.390,"Viadukt"],
+  ["Ehringen – Burg","f",51.230,9.170,"Burg (unbestätigt)"],
+  ["Zimmersrode – Landschaft","f",51.010,9.330,"Landschaft"],
+  ["Anzefahr – Landschaft","f",50.850,8.870,"Landschaft"],
+  ["Bürgeln – Teich","f",50.980,8.700,"Teich"],
+  ["Niederwetter – Landschaft","f",50.810,8.720,"Landschaft"],
+  ["Untersimtshausen – Landschaft","f",50.900,8.630,"Landschaft (unbestätigt)"],
+  ["Ernsthausen – Landschaft","f",51.010,8.600,"Landschaft"],
+  ["Wiesenfeld – Landschaft","f",51.030,8.700,"Landschaft (unbestätigt)"],
+  ["Wiesenfeld – Tunnel","f",51.030,8.700,"Tunnel (unbestätigt)"],
+  ["Herzhausen – Fachwerk","f",51.150,8.750,"Fachwerk"],
+  ["Usseln – Landschaft","f",51.230,8.630,"Landschaft"],
+  ["Niederscheld – Landschaft","f",50.700,8.230,"Landschaft"],
+  ["Sinn – Bahnhof","f",50.560,8.360,"Bahnhof"],
+  ["Niederzeuzheim – Signal","f",50.480,8.070,"Formsignal"],
+  ["Niederweimar – Landschaft","f",50.755,8.720,"Landschaft"],
+  ["Niederwalgern – Bahnhof","f",50.740,8.600,"Bahnhof (unbestätigt)"],
+  ["Fronhausen – Bahnhof","f",50.720,8.660,"Bahnhof"],
+  ["Lollar – Bahnhof","f",50.660,8.700,"Bahnhof"],
+  ["Großen Linden – Bahnhof","f",50.585,8.660,"Bahnhof"],
+  ["Großen Linden – Landschaft","f",50.585,8.660,"Landschaft"],
+  ["Kirch Göns – Brücke","f",50.480,8.720,"Brücke"],
+  ["Pohl-Göns – Landschaft","f",50.480,8.720,"Landschaft"],
+  ["Friedberg – Landschaft","f",50.335,8.756,"Landschaft"],
+  ["Nidderau-Eichen – Landschaft","f",50.230,8.930,"Landschaft"],
+  ["Nieder Ohmen – Signal","f",50.660,9.010,"Formsignal"],
+  ["Burg-Gemünden – Burg","f",50.630,9.050,"Burg"],
+  ["Ehringshausen – Signal","f",50.650,8.400,"Formsignal"],
+  ["Alsfeld-Altenburg – Landschaft","f",50.760,9.260,"Landschaft"],
+  ["Angersbach – Burg","f",50.700,9.470,"Burg"],
+  ["Assenheim – Viadukt","f",50.310,8.780,"Viadukt"],
+  ["Bad Karlshafen – Weser","f",51.635,9.454,"Weser"],
+  ["Butzbach-Ostheim – Kurve","f",50.430,8.680,"Streckenkurve"],
+  ["Hundstadt – Landschaft","f",50.270,8.350,"Landschaft"]
 ];
 var D = [
 ["Abelitz",1,52.584,9.798,"NI","DB AG","395"],
@@ -1493,16 +1601,16 @@ var allMarkers=[],cntS={1:0,3:0,5:0,7:0},cntA={p:0,i:0,v:0};
 D.forEach(function(row){var name=row[0],status=row[1],lat=row[2],lng=row[3],land=row[4],bahn=row[5],kbs=row[6],rem=row[7]||"";var ea=effAnn(name),sc=SC[status],ac=ea?AC[ea]:null;var mk=L.marker([lat,lng],{icon:mkSig(status,ea)});mk.bindPopup("<div class=\"pn\">"+name+"</div><div class=\"ps\">"+land+" &middot; "+bahn+" &middot; KBS "+kbs+"</div><span class=\"pb\" style=\"background:"+sc.col+"\">"+sc.sym+" "+sc.lbl+"</span>"+(ac?"<span class=\"pa\" style=\"background:"+ac.col+"\">"+ac.sym+" "+ac.lbl+"</span>":"")+(rem?"<div class=\"pr\">ℹ "+rem+"</div>":""));allMarkers.push({mk:mk,status:status,name:name,ann:ANN[name]||null});cntS[status]++;var a=ANN[name];if(a)cntA[a]=(cntA[a]||0)+1;});
 Object.keys(cntS).forEach(function(s){document.getElementById("ns"+s).textContent=cntS[s];});
 Object.keys(cntA).forEach(function(a){if(document.getElementById("na"+a))document.getElementById("na"+a).textContent=cntA[a];});
-var allHighlights=[],cntH={b:0,m:0,f:0,t:0};
+var allHighlights=[],cntH={m:0,f:0,t:0};
 H.forEach(function(row){var name=row[0],kat=row[1],lat=row[2],lng=row[3],desc=row[4],url=row[5]||"";var hc=HC[kat]||HC.f;var mk=L.marker([lat,lng],{icon:mkHL(kat,VISITED.has(name))});var dsoOrt=name.replace(/ – .*/,"").replace(/[()]/g,"").trim();
-  var dsoLink=kat==="t"?"<div style=\"margin-top:6px\"><a href=\"https://www.drehscheibe-online.de/galerie/ds_galerie.php?DS=1&action=suche&ret=main\" target=\"_blank\" onclick=\"if(navigator.clipboard)navigator.clipboard.writeText('"+dsoOrt.replace(/'/g,"\\'")+"');\" style=\"font-size:11px;color:#d4860b\">&#11088; DSO: "+dsoOrt+" (in Zwischenablage)</a></div>":"";
+  var dsoLink=true?"<div style=\"margin-top:6px\"><a href=\"https://www.drehscheibe-online.de/galerie/ds_galerie.php?DS=1&action=suche&ret=main\" target=\"_blank\" onclick=\"if(navigator.clipboard)navigator.clipboard.writeText('"+dsoOrt.replace(/'/g,"\\'")+"');\" style=\"font-size:11px;color:#d4860b\">&#11088; DSO: "+dsoOrt+" (in Zwischenablage)</a></div>":"";
   mk.bindPopup("<div class=\"pn\">"+name+"</div><span class=\"pb\" style=\"background:"+hc.col+"\">&#9670; "+hc.lbl+"</span><div class=\"pr\" style=\"margin-top:5px\">"+desc+"</div>"+(url?"<div style=\"margin-top:5px\"><a href=\""+url+"\" target=\"_blank\" style=\"font-size:11px;color:#2980b9\">"+url.replace("https://","")+"</a></div>":"")+dsoLink);allHighlights.push({mk:mk,kat:kat,name:name});cntH[kat]=(cntH[kat]||0)+1;});
 Object.keys(cntH).forEach(function(k){var el=document.getElementById("nh"+k);if(el)el.textContent=cntH[k];});
 function refresh(){allMarkers.forEach(function(o){o.mk.setIcon(mkSig(o.status,effAnn(o.name)));});allHighlights.forEach(function(o){o.mk.setIcon(mkHL(o.kat,VISITED.has(o.name)));});}
 function applyHL(){allHighlights.forEach(function(o){var show=activeH.has(o.kat)||(activeA.has("v")&&VISITED.has(o.name));if(show){if(!theMap.hasLayer(o.mk))o.mk.addTo(theMap);}else{if(theMap.hasLayer(o.mk))theMap.removeLayer(o.mk);}});}
 function applyFilter(){var shown=0;allMarkers.forEach(function(o){var ann=ANN[o.name]||null,isV=VISITED.has(o.name)||ann==="v",vis=false;if(ann==="p"&&activeA.has("p"))vis=true;if(ann==="p"&&activeA.has("i"))vis=true;if(ann==="i"&&activeA.has("i"))vis=true;if(isV&&activeA.has("v"))vis=true;if(activeS.has(o.status))vis=true;if(vis){if(!theMap.hasLayer(o.mk))o.mk.addTo(theMap);shown++;}else{if(theMap.hasLayer(o.mk))theMap.removeLayer(o.mk);}});document.getElementById("sb-txt").textContent=shown+" von "+D.length+" Betriebsstellen sichtbar";}
 function tog(type,key){var chipId=type==="s"?"cs"+key:type==="a"?"ca"+key:"ch"+key,set=type==="s"?activeS:type==="a"?activeA:activeH,chip=document.getElementById(chipId);if(set.has(key)){set.delete(key);chip.classList.add("off");}else{set.add(key);chip.classList.remove("off");}applyHL();applyFilter();}
-function guessLand(lat,lng){if(lat>54.3)return"SH";if(lat>53.8&&lng>10.9)return"MV";if(lat>53.5&&lng>13.8)return"MV";if(lat>53.0&&lng>14.0)return"BB";if(lat>53.0&&lng>11.5&&lng<14.0)return"MV";if(lat>52.3&&lat<54.0&&lng>11.5&&lng<14.6)return"BB";if(lat>51.8&&lat<53.0&&lng>9.8&&lng<12.8)return"ST";if(lat>52.0&&lat<53.8&&lng>6.5&&lng<10.0)return"NI";if(lat>51.0&&lat<52.2&&lng>5.9&&lng<9.5)return"NW";if(lat>50.2&&lat<51.8&&lng>11.8&&lng<15.2)return"SN";if(lat>50.1&&lat<51.7&&lng>9.9&&lng<12.7)return"TH";if(lat>49.4&&lat<51.6&&lng>7.8&&lng<10.3)return"HE";if(lat>47.5&&lat<50.5&&lng>7.5&&lng<10.6)return"BW";if(lat>47.3&&lat<50.6&&lng>10.5)return"BY";if(lat>49.1&&lat<50.9&&lng>6.0&&lng<8.5)return"RP";return"SL";}
+function guessLand(lat,lng){if(lat>54.3)return"SH";if(lat>53.8&&lng>10.9)return"MV";if(lat>53.5&&lng>13.8)return"MV";if(lat>53.0&&lng>14.0)return"BB";if(lat>53.0&&lng>11.5&&lng<14.0)return"MV";if(lat>52.3&&lat<54.0&&lng>11.5&&lng<14.6)return"BB";if(lat>51.8&&lat<53.0&&lng>9.8&&lng<12.8)return"ST";if(lat>52.0&&lat<53.8&&lng>6.5&&lng<10.0)return"NI";if(lat>51.0&&lat<52.2&&lng>5.9&&lng<9.5)return"NW";if(lat<50.6&&lat>47.3&&lng>9.15&&!(lat>49.2&&lng<9.9))return"BY";if(lat>50.2&&lat<51.8&&lng>11.8&&lng<15.2)return"SN";if(lat>50.1&&lat<51.7&&lng>9.9&&lng<12.7)return"TH";if(lat>49.4&&lat<51.6&&lng>7.8&&lng<10.3)return"HE";if(lat>47.5&&lat<50.5&&lng>7.5&&lng<10.6)return"BW";if(lat>49.1&&lat<50.9&&lng>6.0&&lng<8.5)return"RP";return"SL";}
 function updateP(){var tot=D.length+H.length,done=0;D.forEach(function(r){if(VISITED.has(r[0]))done++;});H.forEach(function(r){if(VISITED.has(r[0]))done++;});document.getElementById("lp-done").textContent=done;document.getElementById("lp-total").textContent=tot;document.getElementById("list-progress-fill").style.width=(tot?Math.round(done/tot*100):0)+"%";}
 function toggleVisited(name){if(VISITED.has(name)){VISITED.delete(name);sbDel(name);}else{VISITED.add(name);sbAdd(name);}saveLoc();refresh();applyFilter();applyHL();updateP();renderList();}
 function renderList(){var q=document.getElementById("list-search").value.toLowerCase(),fL=document.getElementById("fl-land").value,fK=document.getElementById("fl-kat").value,fS=document.getElementById("fl-status").value,all=[];if(!fK||fK==="signal"){D.forEach(function(r){var land=r[4],done=VISITED.has(r[0]);if(fL&&land!==fL)return;if(fS==="open"&&done)return;if(fS==="done"&&!done)return;if(q&&r[0].toLowerCase().indexOf(q)<0)return;all.push({name:r[0],sub:r[5]+" &middot; KBS "+r[6],land:land,done:done});});}if(!fK||fK!=="signal"){H.forEach(function(r){if(fK&&fK!==r[1])return;var land=guessLand(r[2],r[3]),done=VISITED.has(r[0]);if(fL&&land!==fL)return;if(fS==="open"&&done)return;if(fS==="done"&&!done)return;if(q&&r[0].toLowerCase().indexOf(q)<0)return;all.push({name:r[0],sub:(HC[r[1]]?HC[r[1]].lbl:"")+(r[4]?" &middot; "+r[4]:""),land:land,done:done});});}var byL={};all.forEach(function(item){var l=LN[item.land]||item.land;if(!byL[l])byL[l]=[];byL[l].push(item);});var html="";Object.keys(byL).sort().forEach(function(ln){var items=byL[ln],dc=items.filter(function(i){return i.done;}).length;html+="<div class=\"list-group\"><div class=\"list-group-header\">"+ln+" <span style=\"font-weight:400;opacity:.6\">"+dc+"/"+items.length+"</span></div>";items.sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(item){var enc=item.name.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");html+="<div class=\"list-item"+(item.done?" done":"")+"\" data-name=\""+enc+"\"><div class=\"li-check\">"+(item.done?"&#10003;":"")+"</div><div><div class=\"li-name\">"+item.name+"</div><div class=\"li-sub\">"+item.sub+"</div></div></div>";});html+="</div>";});if(!html)html="<div style=\"text-align:center;padding:40px;color:#aaa;font-size:13px\">Keine Einträge gefunden</div>";var body=document.getElementById("list-body");body.innerHTML=html;body.onclick=function(e){var item=e.target.closest(".list-item");if(item)toggleVisited(item.getAttribute("data-name"));};}
